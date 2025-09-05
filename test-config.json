@@ -1,0 +1,77 @@
+{
+  "testConfiguration": {
+    "jiraUrl": "https://wfirma.atlassian.net",
+    "jiraEmail": "your-email@domain.com",
+    "jiraApiKey": "your-api-key-here",
+    "fixVersion": "25.9",
+    "projectKey": "RES",
+    "componentName": "5ways"
+  },
+  "jqlQueries": {
+    "mainQuery": "project = RES AND fixVersion = \"25.9\" AND development[pullrequests].all > 0 and development[pullrequests].open = 0",
+    "testCaseCheck": "project = RES AND issuetype = \"Test\" AND issue in linkedIssues({issueKey})",
+    "testPlanFilter": "issue in linkedIssues(\"{testPlanKey}\") AND issueType = Test AND status != Closed"
+  },
+  "expectedResults": {
+    "testCaseStructure": {
+      "fields": {
+        "project": { "key": "RES" },
+        "summary": "RES-123 | Bug | Opis błędu",
+        "description": "Test case for issue https://wfirma.atlassian.net/browse/RES-123",
+        "issuetype": { "name": "Test" },
+        "priority": { "name": "Medium" },
+        "components": [{ "name": "5ways" }],
+        "fixVersions": [{ "name": "FFFV" }]
+      }
+    },
+    "testPlanStructure": {
+      "fields": {
+        "project": { "key": "RES" },
+        "summary": "Test Plan for Release 25.9",
+        "description": "JQL filter for all tests linked to this test plan...",
+        "issuetype": { "name": "Test Plan" },
+        "components": [{ "name": "5ways" }],
+        "fixVersions": [{ "name": "FFFV" }]
+      }
+    },
+    "testExecutionStructure": {
+      "fields": {
+        "project": { "key": "RES" },
+        "summary": "[RC] Test execution for Release 25.9",
+        "description": "JQL filter for all tests linked to this test plan...",
+        "issuetype": { "name": "Test Execution" },
+        "components": [{ "name": "5ways" }],
+        "fixVersions": [{ "name": "FFFV" }]
+      }
+    }
+  },
+  "workflow": {
+    "steps": [
+      {
+        "step": 1,
+        "name": "Sprawdzenie połączenia z API",
+        "description": "Weryfikuje połączenie i liczy wyniki JQL"
+      },
+      {
+        "step": 2,
+        "name": "Pobieranie zadań z JQL",
+        "description": "Pobiera zadania spełniające kryteria"
+      },
+      {
+        "step": 3,
+        "name": "Tworzenie Test Cases",
+        "description": "Tworzy Test Cases z linkami do oryginalnych zadań"
+      },
+      {
+        "step": 4,
+        "name": "Tworzenie Test Plan",
+        "description": "Tworzy Test Plan i linkuje Test Cases"
+      },
+      {
+        "step": 5,
+        "name": "Tworzenie Test Executions",
+        "description": "Tworzy [RC] i [PROD] Test Executions"
+      }
+    ]
+  }
+}

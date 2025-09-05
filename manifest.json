@@ -1,0 +1,33 @@
+{
+  "manifest_version": 3,
+  "name": "Xray Test Generator",
+  "version": "1.0.1",
+  "description": "Automatyczne generowanie testów Xray z zadań Jira",
+  "icons": {
+    "16": "icon16.png",
+    "32": "icon32.png",
+    "48": "icon48.png",
+    "128": "icon128.png"
+  },
+  "permissions": ["storage", "activeTab", "scripting", "sidePanel"],
+  "host_permissions": ["https://*.atlassian.net/*", "https://*.jira.com/*"],
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "Xray Test Generator"
+  },
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": ["https://*.atlassian.net/*", "https://*.jira.com/*"],
+      "js": ["content.js"]
+    }
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": ["popup.html"],
+      "matches": ["https://*.atlassian.net/*", "https://*.jira.com/*"]
+    }
+  ]
+}
