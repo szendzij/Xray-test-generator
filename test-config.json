@@ -8,9 +8,9 @@
     "componentName": "5ways"
   },
   "jqlQueries": {
-    "mainQuery": "project = RES AND fixVersion = \"25.9\" AND development[pullrequests].all > 0 and development[pullrequests].open = 0",
-    "testCaseCheck": "project = RES AND issuetype = \"Test\" AND issue in linkedIssues({issueKey})",
-    "testPlanFilter": "issue in linkedIssues(\"{testPlanKey}\") AND issueType = Test AND status != Closed"
+    "mainQuery": "project = RES AND fixVersion = '25.9' AND development[pullrequests].all > 0 and development[pullrequests].open = 0",
+    "testCaseCheck": "project = RES AND issuetype = 'Test' AND issue in linkedIssues({issueKey})",
+    "testPlanFilter": "issue in linkedIssues('{testPlanKey}') AND issueType = Test AND status != Closed"
   },
   "expectedResults": {
     "testCaseStructure": {
@@ -21,7 +21,7 @@
         "issuetype": { "name": "Test" },
         "priority": { "name": "Medium" },
         "components": [{ "name": "5ways" }],
-        "fixVersions": [{ "name": "FFFV" }]
+        "fixVersions": [{ "name": "25.9" }]
       }
     },
     "testPlanStructure": {
@@ -31,7 +31,7 @@
         "description": "JQL filter for all tests linked to this test plan...",
         "issuetype": { "name": "Test Plan" },
         "components": [{ "name": "5ways" }],
-        "fixVersions": [{ "name": "FFFV" }]
+        "fixVersions": [{ "name": "25.9" }]
       }
     },
     "testExecutionStructure": {
@@ -41,7 +41,7 @@
         "description": "JQL filter for all tests linked to this test plan...",
         "issuetype": { "name": "Test Execution" },
         "components": [{ "name": "5ways" }],
-        "fixVersions": [{ "name": "FFFV" }]
+        "fixVersions": [{ "name": "25.9" }]
       }
     }
   },

@@ -3,22 +3,20 @@
 ## [1.0.1] - 2024-01-XX
 
 ### Fixed
-- **API Endpoint Migration**: Zaktualizowano endpointy API z `/rest/api/3/search` na `/rest/api/3/search/jql`
-  - Naprawiono błąd HTTP 410: "The requested API has been removed"
-  - Wszystkie funkcje wyszukiwania używają teraz nowego endpointu
-  - Zaktualizowano dokumentację deweloperską
+- **API Endpoint Update**: Wszystkie zapytania JQL korzystają teraz wyłącznie z `/rest/api/3/search`
+  - Usunięto fallback do usuniętego endpointu `/rest/api/3/search/jql`
+  - Komunikat HTTP 410 nie pojawia się już w trakcie sprawdzania połączenia
+  - Dokumentacja odzwierciedla aktualne zachowanie
 - **MaxResults Parameter**: Naprawiono błąd HTTP 400 w funkcji `getJqlCount()`
   - Zmieniono `maxResults: 0` na `maxResults: 1` (API wymaga wartości 1-5000)
   - Funkcja nadal zwraca poprawną liczbę wszystkich wyników z pola `total`
 
 ### Changed
-- `getJqlCount()` - używa teraz `/rest/api/3/search/jql`
-- `getIssuesByJql()` - używa teraz `/rest/api/3/search/jql`
-- `checkExistingTestCase()` - używa teraz `/rest/api/3/search/jql`
+- `getJqlCount()`, `getIssuesByJql()`, `checkExistingTestCase()` — uproszczone do jednego endpointu `/rest/api/3/search`
 
 ### Technical Details
-- **Problem**: Atlassian usunął stary endpoint `/rest/api/3/search` w ramach migracji API
-- **Rozwiązanie**: Migracja na nowy endpoint `/rest/api/3/search/jql` zgodnie z wytycznymi Atlassian
+- **Problem**: Atlassian usunął endpoint `/rest/api/3/search/jql`, powodując błędy 410 w dotychczasowej implementacji
+- **Rozwiązanie**: Konsolidacja wszystkich zapytań na `/rest/api/3/search` (POST)
 - **Link do dokumentacji**: https://developer.atlassian.com/changelog/#CHANGE-2046
 
 ## [1.0.0] - 2024-01-XX

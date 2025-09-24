@@ -36,7 +36,7 @@ class XrayTestGenerator {
 
         // Save config on input change
         ['jiraUrl', 'jiraEmail', 'jiraApiKey', 'fixVersion', 'projectKey', 'componentName',
-            'customJql', 'customProjectKey', 'customComponentName'].forEach(id => {
+            'customJql', 'customProjectKey', 'customComponentName', 'customFixVersion'].forEach(id => {
                 const element = document.getElementById(id);
                 if (element) {
                     element.addEventListener('input', () => {
@@ -135,8 +135,14 @@ class XrayTestGenerator {
             customComponentName: (value) => {
                 if (!value) return 'Component Name jest wymagany';
                 return null;
+            },
+            customFixVersion: (value) => {
+                if (!value) return 'Fix Version jest wymagana';
+                return null;
             }
         };
+
+        this.validationRules = validationRules;
 
         Object.keys(validationRules).forEach(fieldId => {
             const input = document.getElementById(fieldId);
@@ -154,6 +160,17 @@ class XrayTestGenerator {
                         input.style.borderColor = '';
                     }
                     this.updateStepValidation();
+                });
+                input.addEventListener('input', () => {
+                    const error = validationRules[fieldId](input.value.trim());
+                    if (error) {
+                        errorDiv.textContent = error;
+                        errorDiv.classList.remove('hidden');
+                        input.style.borderColor = '#f44336';
+                    } else {
+                        errorDiv.classList.add('hidden');
+                        input.style.borderColor = '';
+                    }
                 });
             }
         });
@@ -177,7 +194,7 @@ class XrayTestGenerator {
             if (this.jqlMode === 'auto') {
                 fields = ['fixVersion', 'projectKey', 'componentName'];
             } else {
-                fields = ['customJql', 'customProjectKey', 'customComponentName'];
+                fields = ['customJql', 'customProjectKey', 'customComponentName', 'customFixVersion'];
             }
             isValid = this.validateFields(fields);
             document.getElementById('nextStep2').disabled = !isValid;
@@ -193,7 +210,19 @@ class XrayTestGenerator {
             if (!element || !errorDiv) return true; // Skip if element doesn't exist
 
             const value = element.value.trim();
-            return value && errorDiv.classList.contains('hidden');
+            const validator = this.validationRules?.[fieldId];
+            const error = validator ? validator(value) : (value ? null : 'Pole jest wymagane');
+
+            if (error) {
+                errorDiv.textContent = error;
+                errorDiv.classList.remove('hidden');
+                element.style.borderColor = '#f44336';
+                return false;
+            }
+
+            errorDiv.classList.add('hidden');
+            element.style.borderColor = '';
+            return true;
         });
     }
 
@@ -265,7 +294,7 @@ class XrayTestGenerator {
         try {
             const config = await chrome.storage.local.get([
                 'jiraUrl', 'jiraEmail', 'jiraApiKey', 'fixVersion', 'projectKey', 'componentName',
-                'customJql', 'customProjectKey', 'customComponentName', 'jqlMode'
+                'customJql', 'customProjectKey', 'customComponentName', 'customFixVersion', 'jqlMode'
             ]);
 
             if (config.jiraUrl) document.getElementById('jiraUrl').value = config.jiraUrl;
@@ -279,6 +308,7 @@ class XrayTestGenerator {
             if (config.customJql) document.getElementById('customJql').value = config.customJql;
             if (config.customProjectKey) document.getElementById('customProjectKey').value = config.customProjectKey;
             if (config.customComponentName) document.getElementById('customComponentName').value = config.customComponentName;
+            if (config.customFixVersion) document.getElementById('customFixVersion').value = config.customFixVersion;
 
             // Load JQL mode
             if (config.jqlMode) {
@@ -305,6 +335,7 @@ class XrayTestGenerator {
                 customJql: document.getElementById('customJql')?.value || '',
                 customProjectKey: document.getElementById('customProjectKey')?.value || '',
                 customComponentName: document.getElementById('customComponentName')?.value || '',
+                customFixVersion: document.getElementById('customFixVersion')?.value || '',
                 jqlMode: this.jqlMode
             };
 
@@ -331,6 +362,7 @@ class XrayTestGenerator {
                 jiraEmail: document.getElementById('jiraEmail').value,
                 jiraApiKey: document.getElementById('jiraApiKey').value,
                 customJql: document.getElementById('customJql').value,
+                fixVersion: document.getElementById('customFixVersion').value,
                 projectKey: document.getElementById('customProjectKey').value,
                 componentName: document.getElementById('customComponentName').value,
                 jqlMode: 'custom'
@@ -345,7 +377,7 @@ class XrayTestGenerator {
         if (config.jqlMode === 'auto') {
             required = ['jiraUrl', 'jiraEmail', 'jiraApiKey', 'fixVersion', 'projectKey', 'componentName'];
         } else {
-            required = ['jiraUrl', 'jiraEmail', 'jiraApiKey', 'customJql', 'projectKey', 'componentName'];
+            required = ['jiraUrl', 'jiraEmail', 'jiraApiKey', 'customJql', 'fixVersion', 'projectKey', 'componentName'];
         }
 
         for (const field of required) {
@@ -356,6 +388,17 @@ class XrayTestGenerator {
 
         if (!config.jiraUrl.startsWith('https://')) {
             throw new Error('Jira URL musi zaczynać się od https://');
+        }
+
+        // Validate Jira URL format
+        try {
+            new URL(config.jiraUrl);
+        } catch (urlError) {
+            throw new Error('Nieprawidłowy format URL Jira');
+        }
+
+        if (!config.jiraUrl.includes('atlassian.net') && !config.jiraUrl.includes('jira')) {
+            console.warn('URL może nie być prawidłowym adresem Jira. Sprawdź czy to jest poprawny URL do instancji Jira.');
         }
 
         return config;
@@ -502,19 +545,57 @@ class XrayTestGenerator {
             this.log('📋 Krok 3: Tworzenie Test Plan...', 'info');
             this.showProgress(70, 'Tworzenie Test Plan...');
 
-            const testPlan = await this.jiraService.createTestPlan(testCases, config);
-            this.log(`✅ Utworzono Test Plan: ${testPlan.key}`, 'success');
+            let testPlan = await this.jiraService.checkExistingTestPlan(config);
+            if (testPlan) {
+                this.log(`ℹ️ Test Plan ${testPlan.key} już istnieje - pomijam tworzenie`, 'info');
+                this.jiraService.lastTestPlanCreated = false;
+            } else {
+                testPlan = await this.jiraService.createTestPlan(testCases, config);
+                this.log(`✅ Utworzono Test Plan: ${testPlan.key}`, 'success');
+                this.jiraService.lastTestPlanCreated = true;
+            }
             this.showProgress(80, 'Test Plan utworzony');
+
+            if (testCases.length) {
+                this.log('🔗 Powiązywanie Test Cases z Test Plan...', 'info');
+                const linkResult = await this.jiraService.linkTestCasesToIssue(testCases, testPlan.key);
+                if (linkResult.failed > 0) {
+                    this.log(`⚠️ Powiązano ${linkResult.linked} Test Cases z Test Plan ${testPlan.key}. Niepowodzenia: ${linkResult.failed}`, 'warning');
+                } else {
+                    this.log(`✅ Powiązano ${linkResult.linked} Test Cases z Test Plan ${testPlan.key}`, 'success');
+                }
+                this.showProgress(85, `Powiązano ${linkResult.linked} testów`);
+            } else {
+                this.log('ℹ️ Brak nowych Test Cases do powiązania z Test Plan', 'info');
+            }
 
             // Step 4: Create Test Executions
             this.log('🎯 Krok 4: Tworzenie Test Executions...', 'info');
             this.showProgress(90, 'Tworzenie Test Executions...');
 
-            const testExecutions = await this.jiraService.createTestExecutions(testPlan, config);
-            this.log(`✅ Utworzono ${testExecutions.length} Test Executions`, 'success');
+            const { executions: testExecutions, createdCount: createdExecutions } = await this.jiraService.ensureTestExecutions(testPlan, config);
+            if (createdExecutions > 0) {
+                this.log(`✅ Utworzono ${createdExecutions} Test Executions`, 'success');
+            } else {
+                this.log(`ℹ️ Wykorzystano istniejące Test Executions (łącznie ${testExecutions.length})`, 'info');
+            }
+
+            if (testCases.length && testExecutions.length) {
+                for (const execution of testExecutions) {
+                    this.log(`🔗 Powiązywanie Test Cases z Test Execution ${execution.key}...`, 'info');
+                    const linkResult = await this.jiraService.linkTestCasesToIssue(testCases, execution.key);
+                    if (linkResult.failed > 0) {
+                        this.log(`⚠️ Powiązano ${linkResult.linked} Test Cases z Test Execution ${execution.key}. Niepowodzenia: ${linkResult.failed}`, 'warning');
+                    } else {
+                        this.log(`✅ Powiązano ${linkResult.linked} Test Cases z Test Execution ${execution.key}`, 'success');
+                    }
+                }
+            }
 
             this.showProgress(100, 'Zakończono!');
-            this.showStepStatus(`🎉 Sukces! Utworzono ${createdCount} Test Cases, 1 Test Plan i ${testExecutions.length} Test Executions`, 'success');
+            const planSummary = this.jiraService.lastTestPlanCreated ? 'utworzono nowy Test Plan' : 'wykorzystano istniejący Test Plan';
+            const executionSummary = createdExecutions > 0 ? `${createdExecutions} nowych Test Executions (${testExecutions.length} łącznie)` : `${testExecutions.length} istniejących Test Executions`;
+            this.showStepStatus(`🎉 Sukces! Utworzono ${createdCount} Test Cases, ${planSummary} (${testPlan.key}) i ${executionSummary}`, 'success');
 
             // Show reset button after completion
             document.getElementById('resetStepper').classList.remove('hidden');
@@ -532,7 +613,7 @@ class XrayTestGenerator {
         if (config.jqlMode === 'custom') {
             return config.customJql;
         } else {
-            return `project = ${config.projectKey} AND fixVersion = "${config.fixVersion}" AND development[pullrequests].all > 0 and development[pullrequests].open = 0`;
+            return `project = ${config.projectKey} AND fixVersion = '${config.fixVersion}' AND development[pullrequests].all > 0 and development[pullrequests].open = 0`;
         }
     }
 }
@@ -555,54 +636,181 @@ class JiraService {
             }
         };
 
-        const response = await fetch(url, { ...defaultOptions, ...options });
+        console.log(`Making ${options.method || 'GET'} request to: ${url}`);
 
-        if (!response.ok) {
-            const errorText = await response.text();
-            throw new Error(`HTTP ${response.status}: ${errorText}`);
+        try {
+            const response = await fetch(url, { ...defaultOptions, ...options });
+
+            if (!response.ok) {
+                let errorText;
+                try {
+                    errorText = await response.text();
+                } catch (textError) {
+                    errorText = `Cannot read response body: ${textError.message}`;
+                }
+
+                console.error(`HTTP ${response.status} error:`, errorText);
+                const error = new Error(`HTTP ${response.status}: ${errorText}`);
+                error.status = response.status;
+                error.body = errorText;
+                error.url = url;
+                throw error;
+            }
+
+            if (response.status === 204 || response.status === 205) {
+                console.log(`Request successful, no content returned (${response.status})`);
+                return null;
+            }
+
+            const contentType = response.headers.get('content-type') || '';
+            if (response.headers.get('content-length') === '0' || !contentType.includes('application/json')) {
+                console.log('Request successful, no JSON content returned');
+                return null;
+            }
+
+            const data = await response.json();
+            console.log(`Request successful, received ${data.total !== undefined ? `${data.total} total results` : 'data'}`);
+            return data;
+
+        } catch (error) {
+            console.error(`Request failed for ${url}:`, error);
+            if (error.name === 'TypeError' && error.message.includes('fetch')) {
+                throw new Error(`Network error: Cannot connect to ${this.baseUrl}. Please check the URL and your internet connection.`);
+            }
+            throw error;
         }
-
-        return await response.json();
     }
 
     async getJqlCount(jql) {
-        const data = await this.makeRequest('/search/jql', {
-            method: 'POST',
-            body: JSON.stringify({
-                jql: jql,
-                maxResults: 1
-            })
-        });
-        return data.total;
+        // Try the dedicated approximate count endpoint first
+        try {
+            console.log('Attempting approximate count with /search/approximate-count...');
+            const data = await this.makeRequest('/search/approximate-count', {
+                method: 'POST',
+                body: JSON.stringify({ jql })
+            });
+            console.log(`Approximate count successful: ${data?.approximateCount ?? 0}`);
+            return data?.approximateCount ?? 0;
+        } catch (error) {
+            console.log(`Approximate count failed (${error.status}), falling back to search...`);
+            // Fallback to regular search with minimal results to get total count
+            const data = await this.searchIssues({ jql, maxResults: 1 });
+            const total = data?.total ?? 0;
+            console.log(`Total count from search: ${total}`);
+            return total;
+        }
     }
 
     async getIssuesByJql(jql, maxResults = 500) {
-        const data = await this.makeRequest('/search/jql', {
-            method: 'POST',
-            body: JSON.stringify({
-                jql: jql,
-                maxResults: maxResults,
-                fields: ['summary', 'issuetype', 'priority', 'description', 'assignee', 'reporter']
-            })
+        const data = await this.searchIssues({
+            jql,
+            maxResults,
+            fields: ['summary', 'issuetype', 'priority', 'description', 'assignee', 'reporter']
         });
-        return data.issues;
+        return data?.issues ?? [];
     }
 
     async checkExistingTestCase(issueKey) {
+        const jql = `project = ${this.config.projectKey} AND issuetype = "Test" AND issue in linkedIssues(${issueKey})`;
+        return await this.findSingleIssue(jql);
+    }
+
+    async checkExistingTestPlan(config) {
+        const jql = `project = ${config.projectKey} AND issuetype = "Test Plan" AND fixVersion = "${config.fixVersion}" AND summary ~ "\"Test Plan for Release ${config.fixVersion}\""`;
+        return await this.findSingleIssue(jql);
+    }
+
+    async checkExistingTestExecution(prefix, config) {
+        const jql = `project = ${config.projectKey} AND issuetype = "Test Execution" AND fixVersion = "${config.fixVersion}" AND summary ~ "\"${prefix} Test execution for Release ${config.fixVersion}\""`;
+        return await this.findSingleIssue(jql);
+    }
+
+    async findSingleIssue(jql) {
         try {
-            const jql = `project = ${this.config.projectKey} AND issuetype = "Test" AND issue in linkedIssues(${issueKey})`;
-            const data = await this.makeRequest('/search/jql', {
-                method: 'POST',
-                body: JSON.stringify({
-                    jql: jql,
-                    maxResults: 1
-                })
+            const data = await this.searchIssues({
+                jql,
+                maxResults: 1,
+                fields: ['summary']
             });
 
-            return data.issues.length > 0 ? data.issues[0] : null;
+            return data?.issues?.length ? data.issues[0] : null;
         } catch (error) {
-            console.warn(`Warning: Could not check existing test case for ${issueKey}:`, error);
+            console.warn(`Warning: Could not execute JQL check: ${jql}`, error);
             return null;
+        }
+    }
+
+    async searchIssues({ jql, maxResults = 50, fields }) {
+        // Use the new /search/jql endpoint as /search has been deprecated (HTTP 410)
+        const searchEndpoint = '/search/jql';
+        console.log(`Searching issues with JQL: ${jql} (maxResults: ${maxResults})`);
+
+        try {
+            // First try GET request with new API format
+            console.log('Attempting GET request with /search/jql endpoint...');
+            const queryParams = new URLSearchParams({
+                jql,
+                maxResults: maxResults.toString()
+            });
+
+            if (fields && Array.isArray(fields) && fields.length > 0) {
+                queryParams.append('fields', fields.join(','));
+                console.log(`Including fields: ${fields.join(', ')}`);
+            }
+
+            const result = await this.makeRequest(`${searchEndpoint}?${queryParams.toString()}`, {
+                method: 'GET'
+            });
+            console.log('GET request successful');
+            return result;
+
+        } catch (getError) {
+            console.log(`GET request failed (${getError.status}): ${getError.message}, trying POST...`);
+
+            // If GET fails, try POST method with new API format
+            try {
+                const payload = {
+                    jql,
+                    maxResults,
+                    fields: fields && Array.isArray(fields) && fields.length > 0 ? fields : undefined
+                };
+
+                // Remove undefined fields from payload
+                Object.keys(payload).forEach(key => payload[key] === undefined && delete payload[key]);
+
+                const result = await this.makeRequest(searchEndpoint, {
+                    method: 'POST',
+                    body: JSON.stringify(payload)
+                });
+                console.log('POST request successful');
+                return result;
+
+            } catch (postError) {
+                console.log(`POST request failed (${postError.status}): ${postError.message}`);
+
+                // If POST with fields fails, try without fields
+                if (fields && postError.status === 400) {
+                    console.log('Retrying POST request without fields...');
+                    try {
+                        const result = await this.makeRequest(searchEndpoint, {
+                            method: 'POST',
+                            body: JSON.stringify({ jql, maxResults })
+                        });
+                        console.log('POST request without fields successful');
+                        return result;
+                    } catch (simplePostError) {
+                        console.error(`All search attempts failed. Final error:`, simplePostError);
+                        throw simplePostError;
+                    }
+                }
+
+                // If this is still 410, try the legacy fallback
+                if (postError.status === 410) {
+                    console.log('New API also deprecated, this should not happen. Check Atlassian documentation for latest endpoint.');
+                }
+
+                throw postError;
+            }
         }
     }
 
@@ -648,7 +856,7 @@ class JiraService {
                 issuetype: { name: 'Test' },
                 priority: { name: issue.fields.priority.name },
                 components: [{ name: config.componentName }],
-                fixVersions: [{ name: 'FFFV' }]
+                fixVersions: config.fixVersion ? [{ name: config.fixVersion }] : []
             }
         };
 
@@ -657,19 +865,7 @@ class JiraService {
             body: JSON.stringify(testCaseData)
         });
 
-        // Link test case to original issue
-        try {
-            await this.makeRequest('/issueLink', {
-                method: 'POST',
-                body: JSON.stringify({
-                    type: { name: 'Relates' },
-                    inwardIssue: { key: response.key },
-                    outwardIssue: { key: issue.key }
-                })
-            });
-        } catch (linkError) {
-            console.warn(`Warning: Could not link test case ${response.key} to issue ${issue.key}:`, linkError);
-        }
+        await this.linkIssues(response.key, issue.key);
 
         return response;
     }
@@ -705,7 +901,7 @@ class JiraService {
                 },
                 issuetype: { name: 'Test Plan' },
                 components: [{ name: config.componentName }],
-                fixVersions: [{ name: 'FFFV' }]
+                fixVersions: config.fixVersion ? [{ name: config.fixVersion }] : []
             }
         };
 
@@ -756,31 +952,21 @@ class JiraService {
             })
         });
 
-        // Link test cases to test plan
-        for (const testCase of testCases) {
-            try {
-                await this.makeRequest('/issueLink', {
-                    method: 'POST',
-                    body: JSON.stringify({
-                        type: { name: 'Relates' },
-                        inwardIssue: { key: testCase.key },
-                        outwardIssue: { key: response.key }
-                    })
-                });
-                await new Promise(resolve => setTimeout(resolve, 200));
-            } catch (linkError) {
-                console.warn(`Warning: Could not link test case ${testCase.key} to test plan ${response.key}:`, linkError);
-            }
-        }
-
         return response;
     }
 
-    async createTestExecutions(testPlan, config) {
+    async ensureTestExecutions(testPlan, config) {
         const executions = [];
         const prefixes = ['[RC]', '[PROD]'];
+        let createdCount = 0;
 
         for (const prefix of prefixes) {
+            let execution = await this.checkExistingTestExecution(prefix, config);
+            if (execution) {
+                executions.push(execution);
+                continue;
+            }
+
             const testExecutionData = {
                 fields: {
                     project: { key: config.projectKey },
@@ -811,33 +997,68 @@ class JiraService {
                     },
                     issuetype: { name: 'Test Execution' },
                     components: [{ name: config.componentName }],
-                    fixVersions: [{ name: 'FFFV' }]
+                    fixVersions: config.fixVersion ? [{ name: config.fixVersion }] : []
                 }
             };
 
-            const response = await this.makeRequest('/issue', {
+            execution = await this.makeRequest('/issue', {
                 method: 'POST',
                 body: JSON.stringify(testExecutionData)
             });
 
-            // Link test execution to test plan
-            try {
-                await this.makeRequest('/issueLink', {
-                    method: 'POST',
-                    body: JSON.stringify({
-                        type: { name: 'Relates' },
-                        inwardIssue: { key: response.key },
-                        outwardIssue: { key: testPlan.key }
-                    })
-                });
-            } catch (linkError) {
-                console.warn(`Warning: Could not link test execution ${response.key} to test plan ${testPlan.key}:`, linkError);
-            }
+            executions.push(execution);
+            createdCount += 1;
 
-            executions.push(response);
+            // Link execution to test plan via issue link for traceability
+            await this.linkIssues(execution.key, testPlan.key);
         }
 
-        return executions;
+        return { executions, createdCount };
+    }
+
+    async linkIssues(inwardKey, outwardKey, linkType = 'Relates') {
+        if (!inwardKey || !outwardKey) {
+            return false;
+        }
+
+        try {
+            await this.makeRequest('/issueLink', {
+                method: 'POST',
+                body: JSON.stringify({
+                    type: { name: linkType },
+                    inwardIssue: { key: inwardKey },
+                    outwardIssue: { key: outwardKey }
+                })
+            });
+            return true;
+        } catch (error) {
+            console.warn(`Warning: Could not link ${inwardKey} to ${outwardKey}:`, error);
+            return false;
+        }
+    }
+
+    async linkTestCasesToIssue(testCases, targetIssueKey) {
+        let linked = 0;
+        let failed = 0;
+
+        for (const testCase of testCases) {
+            const testKey = testCase?.key;
+            if (!testKey) {
+                failed += 1;
+                continue;
+            }
+
+            const success = await this.linkIssues(testKey, targetIssueKey);
+            if (success) {
+                linked += 1;
+            } else {
+                failed += 1;
+            }
+
+            await new Promise(resolve => setTimeout(resolve, 200));
+        }
+
+        return { linked, failed };
     }
 }
 
@@ -845,3 +1066,4 @@ class JiraService {
 document.addEventListener('DOMContentLoaded', () => {
     new XrayTestGenerator();
 });
+

@@ -63,7 +63,7 @@ Klasa obsługująca komunikację z Jira API:
 ## API Jira
 
 ### Endpointy używane:
-- `POST /rest/api/3/search/jql` - Wyszukiwanie zadań
+- `POST /rest/api/3/search` - Wyszukiwanie zadań
 - `POST /rest/api/3/issue` - Tworzenie nowych zadań
 - `PUT /rest/api/3/issue/{key}` - Aktualizacja zadań
 - `POST /rest/api/3/issueLink` - Tworzenie linków między zadaniami
