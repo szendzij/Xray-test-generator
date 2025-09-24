@@ -1,4 +1,4 @@
-// Xray Test Generator - Popup Script
+// Xray Test Generator - SidePanel Script
 class XrayTestGenerator {
     constructor() {
         this.jiraService = null;
@@ -13,6 +13,7 @@ class XrayTestGenerator {
         // Original functionality
         document.getElementById('checkConnection').addEventListener('click', () => this.checkConnection());
         document.getElementById('generateTests').addEventListener('click', () => this.generateTests());
+
 
         // Stepper navigation
         document.getElementById('nextStep1').addEventListener('click', () => this.goToStep(2));
@@ -47,6 +48,19 @@ class XrayTestGenerator {
 
         // Real-time validation
         this.setupValidation();
+
+        // Listen for messages from background script
+        chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+            if (request.action === 'openSidePanel') {
+                this.handleSidePanelOpen();
+            }
+        });
+    }
+
+    handleSidePanelOpen() {
+        // Handle any initialization when side panel is opened
+        console.log('Side panel opened');
+        this.loadSavedConfig();
     }
 
     switchJqlMode(mode) {

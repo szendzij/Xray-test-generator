@@ -127,7 +127,7 @@ function initialize() {
         indicator.title = 'Xray Test Generator - Kliknij aby otworzyć';
 
         indicator.addEventListener('click', () => {
-            chrome.runtime.sendMessage({ action: 'openPopup' });
+            chrome.runtime.sendMessage({ action: 'openSidePanel' });
         });
 
         indicator.addEventListener('mouseenter', () => {

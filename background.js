@@ -13,7 +13,7 @@ chrome.runtime.onInstalled.addListener((details) => {
     }
 });
 
-// Handle messages from popup or content scripts
+// Handle messages from sidepanel or content scripts
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     if (request.action === 'getConfig') {
         chrome.storage.local.get([
@@ -30,10 +30,35 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         });
         return true;
     }
+
+    if (request.action === 'openSidePanel') {
+        // Open side panel when requested
+        chrome.sidePanel.open({ windowId: sender.tab.windowId });
+        sendResponse({ success: true });
+        return true;
+    }
 });
 
-// Handle extension icon click
-chrome.action.onClicked.addListener((tab) => {
-    // This will open the popup automatically due to manifest configuration
-    console.log('Extension icon clicked');
+// Handle extension icon click - open side panel
+chrome.action.onClicked.addListener(async (tab) => {
+    try {
+        // Open side panel for the current tab
+        await chrome.sidePanel.open({ tabId: tab.id });
+        console.log('Side panel opened for tab:', tab.id);
+    } catch (error) {
+        console.error('Error opening side panel:', error);
+    }
+});
+
+// Configure side panel behavior
+chrome.runtime.onInstalled.addListener(async () => {
+    try {
+        // Set side panel to open when action button is clicked
+        await chrome.sidePanel.setPanelBehavior({
+            openPanelOnActionClick: true
+        });
+        console.log('Side panel behavior configured');
+    } catch (error) {
+        console.error('Error configuring side panel behavior:', error);
+    }
 });
