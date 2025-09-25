@@ -18,12 +18,12 @@
     "default_path": "sidepanel.html"
   },
   "background": {
-    "service_worker": "background.js"
+    "service_worker": "scripts/background.js"
   },
   "content_scripts": [
     {
       "matches": ["https://*.atlassian.net/*", "https://*.jira.com/*"],
-      "js": ["content.js"]
+      "js": ["scripts/content.js"]
     }
   ],
   "web_accessible_resources": [
