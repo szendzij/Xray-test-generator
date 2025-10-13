@@ -5,6 +5,8 @@ class XrayTestGenerator {
         this.currentStep = 1;
         this.connectionVerified = false;
         this.jqlMode = 'auto'; // 'auto' or 'custom'
+        this.currentTheme = 'light'; // 'light' or 'dark'
+        this.initializeTheme();
         this.initializeEventListeners();
         this.loadSavedConfig();
     }
@@ -25,6 +27,9 @@ class XrayTestGenerator {
         // JQL Mode Toggle
         document.getElementById('autoJqlBtn').addEventListener('click', () => this.switchJqlMode('auto'));
         document.getElementById('customJqlBtn').addEventListener('click', () => this.switchJqlMode('custom'));
+
+        // Theme Toggle
+        document.getElementById('themeToggle').addEventListener('click', () => this.toggleTheme());
 
         // Step clicking
         document.querySelectorAll('.step').forEach(step => {
@@ -61,6 +66,33 @@ class XrayTestGenerator {
         // Handle any initialization when side panel is opened
         console.log('Side panel opened');
         this.loadSavedConfig();
+    }
+
+    initializeTheme() {
+        // Load saved theme preference or default to light
+        const savedTheme = localStorage.getItem('xray-theme') || 'light';
+        this.setTheme(savedTheme);
+    }
+
+    toggleTheme() {
+        const newTheme = this.currentTheme === 'light' ? 'dark' : 'light';
+        this.setTheme(newTheme);
+    }
+
+    setTheme(theme) {
+        this.currentTheme = theme;
+        document.documentElement.setAttribute('data-theme', theme);
+
+        // Update theme icon
+        const themeIcon = document.getElementById('themeIcon');
+        if (themeIcon) {
+            themeIcon.textContent = theme === 'light' ? '🌞' : '🌙';
+        }
+
+        // Save preference
+        localStorage.setItem('xray-theme', theme);
+
+        console.log(`Theme switched to: ${theme}`);
     }
 
     switchJqlMode(mode) {
@@ -416,10 +448,11 @@ class XrayTestGenerator {
     showProgress(percent, text = '') {
         const progress = document.getElementById('progress');
         const progressBar = document.getElementById('progressBar');
+        const progressText = document.getElementById('progressText');
 
         progress.classList.remove('hidden');
         progressBar.style.width = `${percent}%`;
-        progressBar.textContent = text || `${percent}%`;
+        progressText.textContent = text || `${percent}%`;
     }
 
     hideProgress() {
