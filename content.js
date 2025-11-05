@@ -102,42 +102,42 @@ function initialize() {
     if (isJiraPage()) {
         console.log('Xray Test Generator: Jira page detected');
 
-        // Add a small indicator that the extension is active
-        const indicator = document.createElement('div');
-        indicator.id = 'xray-generator-indicator';
-        indicator.style.cssText = `
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            width: 50px;
-            height: 50px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-size: 20px;
-            cursor: pointer;
-            z-index: 9999;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-            transition: transform 0.2s ease;
-        `;
-        indicator.textContent = '🚀';
-        indicator.title = 'Xray Test Generator - Kliknij aby otworzyć';
+        // // Add a small indicator that the extension is active
+        // const indicator = document.createElement('div');
+        // indicator.id = 'xray-generator-indicator';
+        // indicator.style.cssText = `
+        //     position: fixed;
+        //     bottom: 20px;
+        //     right: 20px;
+        //     width: 50px;
+        //     height: 50px;
+        //     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        //     border-radius: 50%;
+        //     display: flex;
+        //     align-items: center;
+        //     justify-content: center;
+        //     color: white;
+        //     font-size: 20px;
+        //     cursor: pointer;
+        //     z-index: 9999;
+        //     box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        //     transition: transform 0.2s ease;
+        // `;
+        // indicator.textContent = '🚀';
+        // indicator.title = 'Xray Test Generator - Kliknij aby otworzyć';
 
-        indicator.addEventListener('click', () => {
-            chrome.runtime.sendMessage({ action: 'openSidePanel' });
-        });
+        // indicator.addEventListener('click', () => {
+        //     chrome.runtime.sendMessage({ action: 'openSidePanel' });
+        // });
 
-        indicator.addEventListener('mouseenter', () => {
-            indicator.style.transform = 'scale(1.1)';
-        });
+        // indicator.addEventListener('mouseenter', () => {
+        //     indicator.style.transform = 'scale(1.1)';
+        // });
 
-        indicator.addEventListener('mouseleave', () => {
-            indicator.style.transform = 'scale(1)';
-        });
+        // indicator.addEventListener('mouseleave', () => {
+        //     indicator.style.transform = 'scale(1)';
+        // });
 
-        document.body.appendChild(indicator);
+        // document.body.appendChild(indicator);
     }
 }
