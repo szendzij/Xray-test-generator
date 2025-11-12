@@ -15,28 +15,38 @@ chrome.runtime.onInstalled.addListener((details) => {
 
 // Handle messages from sidepanel or content scripts
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-    if (request.action === 'getConfig') {
-        chrome.storage.local.get([
-            'jiraUrl', 'jiraEmail', 'jiraApiKey', 'fixVersion', 'projectKey', 'componentName'
-        ], (config) => {
-            sendResponse(config);
-        });
-        return true; // Keep message channel open for async response
-    }
+    // Handle async operations
+    (async () => {
+        try {
+            if (request.action === 'getConfig') {
+                const config = await chrome.storage.local.get([
+                    'jiraUrl', 'jiraEmail', 'jiraApiKey', 'fixVersion', 'projectKey', 'componentName'
+                ]);
+                sendResponse(config);
+                return;
+            }
 
-    if (request.action === 'saveConfig') {
-        chrome.storage.local.set(request.config, () => {
-            sendResponse({ success: true });
-        });
-        return true;
-    }
+            if (request.action === 'saveConfig') {
+                await chrome.storage.local.set(request.config);
+                sendResponse({ success: true });
+                return;
+            }
 
-    if (request.action === 'openSidePanel') {
-        // Open side panel when requested
-        chrome.sidePanel.open({ windowId: sender.tab.windowId });
-        sendResponse({ success: true });
-        return true;
-    }
+            if (request.action === 'openSidePanel') {
+                // Open side panel when requested
+                if (sender.tab?.windowId) {
+                    await chrome.sidePanel.open({ windowId: sender.tab.windowId });
+                }
+                sendResponse({ success: true });
+                return;
+            }
+        } catch (error) {
+            console.error('Error handling message:', error);
+            sendResponse({ success: false, error: error.message });
+        }
+    })();
+
+    return true; // Keep message channel open for async response
 });
 
 // Handle extension icon click - open side panel
