@@ -332,13 +332,19 @@ class XrayTestGenerator {
         this.uiManager.log('🎯 Krok 4: Tworzenie Test Executions...', 'info');
         this.uiManager.showProgress(CONSTANTS.PROGRESS.CREATE_TEST_EXECUTIONS_START, 'Tworzenie Test Executions...');
 
-        const { executions: testExecutions, createdCount: createdExecutions } =
+        const { executions: testExecutions, createdCount: createdExecutions, skippedExecutions } =
             await this.jiraService.ensureTestExecutions(testPlan, config);
 
-        if (createdExecutions > 0) {
-            this.uiManager.log(`✅ Utworzono ${createdExecutions} Test Executions`, 'success');
-        } else {
-            this.uiManager.log(`ℹ️ Wykorzystano istniejące Test Executions (łącznie ${testExecutions.length})`, 'info');
+        for (const exec of testExecutions) {
+            if (exec._wasExisting) {
+                this.uiManager.log(`ℹ️ Test Execution ${exec.key} już istnieje - pomijam tworzenie`, 'info');
+            } else {
+                this.uiManager.log(`✅ Utworzono Test Execution: ${exec.key}`, 'success');
+            }
+        }
+
+        if (createdExecutions === 0) {
+            this.uiManager.log(`ℹ️ Wszystkie Test Executions już istniały (${testExecutions.length} łącznie)`, 'info');
         }
 
         return { testExecutions, createdExecutions };

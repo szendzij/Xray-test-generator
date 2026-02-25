@@ -75,6 +75,8 @@ class JiraService {
             return null; // Skip creation
         }
 
+        const reporterAccountId = issue.fields.reporter?.accountId;
+
         const testCaseData = {
             fields: {
                 project: { key: config.projectKey },
@@ -110,7 +112,8 @@ class JiraService {
                 issuetype: { name: CONSTANTS.ISSUE_TYPES.TEST },
                 priority: { name: issue.fields.priority?.name || 'Medium' },
                 components: [{ name: config.componentName }],
-                fixVersions: config.fixVersion ? [{ name: config.fixVersion }] : []
+                fixVersions: config.fixVersion ? [{ name: config.fixVersion }] : [],
+                ...(reporterAccountId && { assignee: { accountId: reporterAccountId } })
             }
         };
 
@@ -211,11 +214,14 @@ class JiraService {
         const executions = [];
         const prefixes = CONSTANTS.TEST_EXECUTION.PREFIXES;
         let createdCount = 0;
+        let skippedExecutions = 0;
 
         for (const prefix of prefixes) {
             let execution = await this.checkExistingTestExecution(prefix, config);
             if (execution) {
+                execution._wasExisting = true;
                 executions.push(execution);
+                skippedExecutions += 1;
                 continue;
             }
 
@@ -254,6 +260,7 @@ class JiraService {
             };
 
             execution = await this.apiClient.createIssue(testExecutionData);
+            execution._wasExisting = false;
 
             executions.push(execution);
             createdCount += 1;
@@ -262,7 +269,7 @@ class JiraService {
             await this.apiClient.linkIssues(execution.key, testPlan.key);
         }
 
-        return { executions, createdCount };
+        return { executions, createdCount, skippedExecutions };
     }
 
     async linkTestCasesToIssue(testCases, targetIssueKey) {
