@@ -307,6 +307,14 @@ class XrayTestGenerator {
         return { testPlan, wasCreated };
     }
 
+    logLinkResult(linkResult, targetKey) {
+        if (linkResult.failed > 0) {
+            this.uiManager.log(`⚠️ Powiązano ${linkResult.linked} Test Cases z ${targetKey}. Niepowodzenia: ${linkResult.failed}`, 'warning');
+        } else {
+            this.uiManager.log(`✅ Powiązano ${linkResult.linked} Test Cases z ${targetKey}`, 'success');
+        }
+    }
+
     async linkTestCasesToPlan(testCases, testPlan) {
         if (testCases.length === 0) {
             this.uiManager.log('ℹ️ Brak nowych Test Cases do powiązania z Test Plan', 'info');
@@ -315,16 +323,7 @@ class XrayTestGenerator {
 
         this.uiManager.log('🔗 Powiązywanie Test Cases z Test Plan...', 'info');
         const linkResult = await this.jiraService.linkTestCasesToIssue(testCases, testPlan.key);
-
-        if (linkResult.failed > 0) {
-            this.uiManager.log(
-                `⚠️ Powiązano ${linkResult.linked} Test Cases z Test Plan ${testPlan.key}. Niepowodzenia: ${linkResult.failed}`,
-                'warning'
-            );
-        } else {
-            this.uiManager.log(`✅ Powiązano ${linkResult.linked} Test Cases z Test Plan ${testPlan.key}`, 'success');
-        }
-
+        this.logLinkResult(linkResult, `Test Plan ${testPlan.key}`);
         this.uiManager.showProgress(CONSTANTS.PROGRESS.LINK_TEST_CASES, `Powiązano ${linkResult.linked} testów`);
     }
 
@@ -358,15 +357,7 @@ class XrayTestGenerator {
         for (const execution of testExecutions) {
             this.uiManager.log(`🔗 Powiązywanie Test Cases z Test Execution ${execution.key}...`, 'info');
             const linkResult = await this.jiraService.linkTestCasesToIssue(testCases, execution.key);
-
-            if (linkResult.failed > 0) {
-                this.uiManager.log(
-                    `⚠️ Powiązano ${linkResult.linked} Test Cases z Test Execution ${execution.key}. Niepowodzenia: ${linkResult.failed}`,
-                    'warning'
-                );
-            } else {
-                this.uiManager.log(`✅ Powiązano ${linkResult.linked} Test Cases z Test Execution ${execution.key}`, 'success');
-            }
+            this.logLinkResult(linkResult, `Test Execution ${execution.key}`);
         }
     }
 
@@ -385,11 +376,9 @@ class XrayTestGenerator {
     }
 
     buildJqlQuery(config) {
-        if (config.jqlMode === CONSTANTS.JQL_MODE.CUSTOM) {
-            return config.customJql;
-        } else {
-            return `project = ${config.projectKey} AND fixVersion = '${config.fixVersion}' AND development[pullrequests].all > 0 and development[pullrequests].open = 0`;
-        }
+        return config.jqlMode === CONSTANTS.JQL_MODE.CUSTOM
+            ? config.customJql
+            : `project = ${config.projectKey} AND fixVersion = '${config.fixVersion}' AND development[pullrequests].all > 0 and development[pullrequests].open = 0`;
     }
 }
 

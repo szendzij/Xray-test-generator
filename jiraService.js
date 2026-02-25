@@ -14,6 +14,28 @@ class JiraService {
         };
     }
 
+    // --- Helpers ---
+
+    buildAdfDoc(...paragraphs) {
+        return {
+            type: "doc",
+            version: 1,
+            content: paragraphs.map(text => ({
+                type: "paragraph",
+                content: [{ type: "text", text }]
+            }))
+        };
+    }
+
+    async checkCached(store, key, jql) {
+        if (this.cache[store].has(key)) return this.cache[store].get(key);
+        const result = await this.apiClient.findSingleIssue(jql);
+        this.cache[store].set(key, result);
+        return result;
+    }
+
+    // --- Public API ---
+
     async getJqlCount(jql) {
         return await this.apiClient.getJqlCount(jql);
     }
@@ -23,92 +45,39 @@ class JiraService {
     }
 
     async checkExistingTestCase(issueKey) {
-        // Check cache first
-        if (this.cache.testCases.has(issueKey)) {
-            return this.cache.testCases.get(issueKey);
-        }
-
         const jql = `project = ${this.config.projectKey} AND issuetype = "${CONSTANTS.ISSUE_TYPES.TEST}" AND issue in linkedIssues(${issueKey})`;
-        const result = await this.apiClient.findSingleIssue(jql);
-
-        // Cache the result (even if null)
-        this.cache.testCases.set(issueKey, result);
-        return result;
+        return this.checkCached('testCases', issueKey, jql);
     }
 
     async checkExistingTestPlan(config) {
         const cacheKey = `${config.projectKey}-${config.fixVersion}`;
-
-        // Check cache first
-        if (this.cache.testPlans.has(cacheKey)) {
-            return this.cache.testPlans.get(cacheKey);
-        }
-
         const jql = `project = ${config.projectKey} AND issuetype = "${CONSTANTS.ISSUE_TYPES.TEST_PLAN}" AND fixVersion = "${config.fixVersion}" AND summary ~ "\"Test Plan for Release ${config.fixVersion}\""`;
-        const result = await this.apiClient.findSingleIssue(jql);
-
-        // Cache the result
-        this.cache.testPlans.set(cacheKey, result);
-        return result;
+        return this.checkCached('testPlans', cacheKey, jql);
     }
 
     async checkExistingTestExecution(prefix, config) {
         const cacheKey = `${config.projectKey}-${config.fixVersion}-${prefix}`;
-
-        // Check cache first
-        if (this.cache.testExecutions.has(cacheKey)) {
-            return this.cache.testExecutions.get(cacheKey);
-        }
-
         const jql = `project = ${config.projectKey} AND issuetype = "${CONSTANTS.ISSUE_TYPES.TEST_EXECUTION}" AND fixVersion = "${config.fixVersion}" AND summary ~ "\"${prefix} Test execution for Release ${config.fixVersion}\""`;
-        const result = await this.apiClient.findSingleIssue(jql);
-
-        // Cache the result
-        this.cache.testExecutions.set(cacheKey, result);
-        return result;
+        return this.checkCached('testExecutions', cacheKey, jql);
     }
 
     async createTestCase(issue, config) {
-        // Check if test case already exists
         const existingTestCase = await this.checkExistingTestCase(issue.key);
-        if (existingTestCase) {
-            return null; // Skip creation
-        }
+        if (existingTestCase) return null;
 
         const reporterAccountId = issue.fields.reporter?.accountId;
+        const descriptionText = issue.fields.description
+            ? (typeof issue.fields.description === 'string' ? issue.fields.description : 'Description available in original issue')
+            : '';
 
         const testCaseData = {
             fields: {
                 project: { key: config.projectKey },
                 summary: `${issue.key} | ${issue.fields.issuetype.name} | ${issue.fields.summary}`,
-                description: {
-                    type: "doc",
-                    version: 1,
-                    content: [
-                        {
-                            type: "paragraph",
-                            content: [
-                                {
-                                    type: "text",
-                                    text: `Test case for issue ${config.jiraUrl}/browse/${issue.key}`
-                                }
-                            ]
-                        },
-                        {
-                            type: "paragraph",
-                            content: [
-                                {
-                                    type: "text",
-                                    text: issue.fields.description ?
-                                        (typeof issue.fields.description === 'string' ?
-                                            issue.fields.description :
-                                            'Description available in original issue') :
-                                        ''
-                                }
-                            ]
-                        }
-                    ]
-                },
+                description: this.buildAdfDoc(
+                    `Test case for issue ${config.jiraUrl}/browse/${issue.key}`,
+                    descriptionText
+                ),
                 issuetype: { name: CONSTANTS.ISSUE_TYPES.TEST },
                 priority: { name: issue.fields.priority?.name || 'Medium' },
                 components: [{ name: config.componentName }],
@@ -118,48 +87,23 @@ class JiraService {
         };
 
         const response = await this.apiClient.createIssue(testCaseData);
-
-        // Link the test case to the original issue
         await this.apiClient.linkIssues(response.key, issue.key);
-
         return response;
     }
 
     async createTestPlan(testCases, config) {
-        // Check if test plan already exists
         const existingTestPlan = await this.checkExistingTestPlan(config);
-        if (existingTestPlan) {
-            return existingTestPlan; // Return existing instead of creating duplicate
-        }
+        if (existingTestPlan) return existingTestPlan;
 
+        const date = new Date().toISOString().split('T')[0];
         const testPlanData = {
             fields: {
                 project: { key: config.projectKey },
                 summary: `Test Plan for Release ${config.fixVersion}`,
-                description: {
-                    type: "doc",
-                    version: 1,
-                    content: [
-                        {
-                            type: "paragraph",
-                            content: [
-                                {
-                                    type: "text",
-                                    text: `Test plan for release ${config.fixVersion} created on ${new Date().toISOString().split('T')[0]}`
-                                }
-                            ]
-                        },
-                        {
-                            type: "paragraph",
-                            content: [
-                                {
-                                    type: "text",
-                                    text: "JQL filter for all tests linked to this test plan:"
-                                }
-                            ]
-                        }
-                    ]
-                },
+                description: this.buildAdfDoc(
+                    `Test plan for release ${config.fixVersion} created on ${date}`,
+                    "JQL filter for all tests linked to this test plan:"
+                ),
                 issuetype: { name: CONSTANTS.ISSUE_TYPES.TEST_PLAN },
                 components: [{ name: config.componentName }],
                 fixVersions: config.fixVersion ? [{ name: config.fixVersion }] : []
@@ -168,43 +112,14 @@ class JiraService {
 
         const response = await this.apiClient.createIssue(testPlanData);
 
-        // Update description with correct test plan key
-        const updatedDescription = {
-            type: "doc",
-            version: 1,
-            content: [
-                {
-                    type: "paragraph",
-                    content: [
-                        {
-                            type: "text",
-                            text: `Test plan for release ${config.fixVersion} created on ${new Date().toISOString().split('T')[0]}`
-                        }
-                    ]
-                },
-                {
-                    type: "paragraph",
-                    content: [
-                        {
-                            type: "text",
-                            text: "JQL filter for all tests linked to this test plan:"
-                        }
-                    ]
-                },
-                {
-                    type: "paragraph",
-                    content: [
-                        {
-                            type: "text",
-                            text: `issue in linkedIssues("${response.key}") AND issueType = Test AND status != Closed`
-                        }
-                    ]
-                }
-            ]
-        };
-
         await this.apiClient.updateIssue(response.key, {
-            fields: { description: updatedDescription }
+            fields: {
+                description: this.buildAdfDoc(
+                    `Test plan for release ${config.fixVersion} created on ${date}`,
+                    "JQL filter for all tests linked to this test plan:",
+                    `issue in linkedIssues("${response.key}") AND issueType = Test AND status != Closed`
+                )
+            }
         });
 
         return response;
@@ -229,30 +144,10 @@ class JiraService {
                 fields: {
                     project: { key: config.projectKey },
                     summary: `${prefix} Test execution for Release ${config.fixVersion}`,
-                    description: {
-                        type: "doc",
-                        version: 1,
-                        content: [
-                            {
-                                type: "paragraph",
-                                content: [
-                                    {
-                                        type: "text",
-                                        text: "JQL filter for all tests linked to this test plan:"
-                                    }
-                                ]
-                            },
-                            {
-                                type: "paragraph",
-                                content: [
-                                    {
-                                        type: "text",
-                                        text: `issue in linkedIssues("${testPlan.key}") AND issueType = Test AND status != Closed`
-                                    }
-                                ]
-                            }
-                        ]
-                    },
+                    description: this.buildAdfDoc(
+                        "JQL filter for all tests linked to this test plan:",
+                        `issue in linkedIssues("${testPlan.key}") AND issueType = Test AND status != Closed`
+                    ),
                     issuetype: { name: CONSTANTS.ISSUE_TYPES.TEST_EXECUTION },
                     components: [{ name: config.componentName }],
                     fixVersions: config.fixVersion ? [{ name: config.fixVersion }] : []

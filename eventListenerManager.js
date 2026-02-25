@@ -69,27 +69,18 @@ class EventListenerManager {
             const errorDiv = DOMHelper.getElement(`${fieldId}Error`);
 
             if (input && errorDiv) {
-                // Blur validation
-                const blurHandler = () => {
+                const validationHandler = () => {
                     const value = input.value.trim();
                     const error = validationService.validateField(fieldId, value);
                     this.updateFieldValidation(fieldId, error);
                     this.xrayTestGenerator.updateStepValidation();
                 };
 
-                // Input validation (real-time)
-                const inputHandler = () => {
-                    const value = input.value.trim();
-                    const error = validationService.validateField(fieldId, value);
-                    this.updateFieldValidation(fieldId, error);
-                    this.xrayTestGenerator.updateStepValidation();
-                };
+                input.addEventListener('blur', validationHandler);
+                input.addEventListener('input', validationHandler);
 
-                input.addEventListener('blur', blurHandler);
-                input.addEventListener('input', inputHandler);
-
-                this.listeners.set(`validation-blur-${fieldId}`, { element: input, event: 'blur', handler: blurHandler });
-                this.listeners.set(`validation-input-${fieldId}`, { element: input, event: 'input', handler: inputHandler });
+                this.listeners.set(`validation-blur-${fieldId}`, { element: input, event: 'blur', handler: validationHandler });
+                this.listeners.set(`validation-input-${fieldId}`, { element: input, event: 'input', handler: validationHandler });
             }
         });
     }

@@ -16,21 +16,9 @@ class ConfigManager {
     async loadSavedConfig() {
         try {
             const config = await chrome.storage.local.get(CONSTANTS.STORAGE.KEYS);
-            
-            // Load auto JQL fields
-            if (config.jiraUrl) DOMHelper.setValue('jiraUrl', config.jiraUrl);
-            if (config.jiraEmail) DOMHelper.setValue('jiraEmail', config.jiraEmail);
-            if (config.jiraApiKey) DOMHelper.setValue('jiraApiKey', config.jiraApiKey);
-            if (config.fixVersion) DOMHelper.setValue('fixVersion', config.fixVersion);
-            if (config.projectKey) DOMHelper.setValue('projectKey', config.projectKey);
-            if (config.componentName) DOMHelper.setValue('componentName', config.componentName);
-
-            // Load custom JQL fields
-            if (config.customJql) DOMHelper.setValue('customJql', config.customJql);
-            if (config.customProjectKey) DOMHelper.setValue('customProjectKey', config.customProjectKey);
-            if (config.customComponentName) DOMHelper.setValue('customComponentName', config.customComponentName);
-            if (config.customFixVersion) DOMHelper.setValue('customFixVersion', config.customFixVersion);
-
+            CONSTANTS.STORAGE.KEYS.forEach(key => {
+                if (config[key]) DOMHelper.setValue(key, config[key]);
+            });
             return config;
         } catch (error) {
             logger.error('Błąd podczas ładowania konfiguracji:', error);
