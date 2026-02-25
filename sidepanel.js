@@ -85,8 +85,7 @@ class XrayTestGenerator {
 
             // Load JQL mode
             if (config.jqlMode) {
-                this.jqlMode = config.jqlMode;
-                this.switchJqlMode(this.jqlMode);
+                this.switchJqlMode(config.jqlMode);
             }
 
             // Update validation after loading
