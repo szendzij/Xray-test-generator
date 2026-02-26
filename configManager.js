@@ -17,7 +17,7 @@ class ConfigManager {
         try {
             const config = await chrome.storage.local.get(CONSTANTS.STORAGE.KEYS);
             CONSTANTS.STORAGE.KEYS.forEach(key => {
-                if (config[key]) DOMHelper.setValue(key, config[key]);
+                if (key !== 'jqlMode' && config[key]) DOMHelper.setValue(key, config[key]);
             });
             return config;
         } catch (error) {
