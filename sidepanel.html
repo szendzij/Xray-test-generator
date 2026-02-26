@@ -451,38 +451,43 @@
         .status {
             margin-top: 10px;
             padding: 9px 13px;
-            border-radius: 0 8px 8px 0;
+            border-radius: 10px;
             font-size: 12px;
             flex-shrink: 0;
-            border-left: 3px solid;
+            border: 1px solid;
             display: flex;
             align-items: center;
             gap: 8px;
-            backdrop-filter: blur(8px);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
         }
 
         .status.success {
-            background: rgba(16, 185, 129, 0.09);
-            border-left-color: #10b981;
+            background: rgba(16, 185, 129, 0.08);
+            border-color: rgba(16, 185, 129, 0.28);
             color: #34d399;
+            box-shadow: 0 4px 20px rgba(16, 185, 129, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.05);
         }
 
         .status.error {
-            background: rgba(239, 68, 68, 0.09);
-            border-left-color: #ef4444;
+            background: rgba(239, 68, 68, 0.08);
+            border-color: rgba(239, 68, 68, 0.28);
             color: #f87171;
+            box-shadow: 0 4px 20px rgba(239, 68, 68, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.05);
         }
 
         .status.info {
-            background: rgba(59, 130, 246, 0.09);
-            border-left-color: #3b82f6;
+            background: rgba(59, 130, 246, 0.08);
+            border-color: rgba(59, 130, 246, 0.28);
             color: #60a5fa;
+            box-shadow: 0 4px 20px rgba(59, 130, 246, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.05);
         }
 
         .status.warning {
-            background: rgba(245, 158, 11, 0.09);
-            border-left-color: #f59e0b;
+            background: rgba(245, 158, 11, 0.08);
+            border-color: rgba(245, 158, 11, 0.28);
             color: #fbbf24;
+            box-shadow: 0 4px 20px rgba(245, 158, 11, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.05);
         }
 
         /* =======================================
@@ -525,13 +530,16 @@
             margin-top: 12px;
             max-height: 200px;
             overflow-y: auto;
-            background: rgba(0, 0, 0, 0.42);
+            background: rgba(0, 0, 0, 0.30);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
             border-radius: 10px;
             padding: 10px 12px;
             font-family: 'SF Mono', 'Fira Code', 'Roboto Mono', Menlo, Monaco, Consolas, monospace;
             font-size: 11px;
             flex-shrink: 0;
-            border: 1px solid rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(124, 58, 237, 0.18);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.04);
             line-height: 1.6;
         }
 
