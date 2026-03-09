@@ -4,59 +4,59 @@ class ValidationService {
     constructor() {
         this.validationRules = {
             jiraUrl: (value) => {
-                if (!value) return 'URL jest wymagany';
-                if (!value.startsWith('https://')) return 'URL musi zaczynać się od https://';
+                if (!value) return i18n.t('val.urlRequired');
+                if (!value.startsWith('https://')) return i18n.t('val.urlHttps');
                 try {
                     new URL(value);
                 } catch (urlError) {
-                    return 'Nieprawidłowy format URL Jira';
+                    return i18n.t('val.urlInvalid');
                 }
                 return null;
             },
             jiraEmail: (value) => {
-                if (!value) return 'Email jest wymagany';
-                if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) return 'Nieprawidłowy format email';
+                if (!value) return i18n.t('val.emailRequired');
+                if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) return i18n.t('val.emailInvalid');
                 return null;
             },
             jiraApiKey: (value) => {
-                if (!value) return 'API Key jest wymagany';
+                if (!value) return i18n.t('val.apiKeyRequired');
                 if (value.length < CONSTANTS.VALIDATION.MIN_API_KEY_LENGTH) {
-                    return 'API Key jest za krótki';
+                    return i18n.t('val.apiKeyShort');
                 }
                 return null;
             },
             fixVersion: (value) => {
-                if (!value) return 'Fix Version jest wymagana';
+                if (!value) return i18n.t('val.fixVersionRequired');
                 return null;
             },
             projectKey: (value) => {
-                if (!value) return 'Project Key jest wymagany';
-                if (!/^[A-Z]+$/.test(value)) return 'Project Key może zawierać tylko wielkie litery';
+                if (!value) return i18n.t('val.projectKeyRequired');
+                if (!/^[A-Z]+$/.test(value)) return i18n.t('val.projectKeyFormat');
                 return null;
             },
             componentName: (value) => {
-                if (!value) return 'Component Name jest wymagany';
+                if (!value) return i18n.t('val.componentRequired');
                 return null;
             },
             customJql: (value) => {
-                if (!value) return 'JQL jest wymagane';
-                if (value.length < CONSTANTS.VALIDATION.MIN_JQL_LENGTH) return 'JQL jest za krótkie';
+                if (!value) return i18n.t('val.jqlRequired');
+                if (value.length < CONSTANTS.VALIDATION.MIN_JQL_LENGTH) return i18n.t('val.jqlShort');
                 if (!value.toLowerCase().includes('project')) {
-                    return 'JQL powinno zawierać warunek "project"';
+                    return i18n.t('val.jqlProject');
                 }
                 return null;
             },
             customProjectKey: (value) => {
-                if (!value) return 'Project Key jest wymagany';
-                if (!/^[A-Z]+$/.test(value)) return 'Project Key może zawierać tylko wielkie litery';
+                if (!value) return i18n.t('val.projectKeyRequired');
+                if (!/^[A-Z]+$/.test(value)) return i18n.t('val.projectKeyFormat');
                 return null;
             },
             customComponentName: (value) => {
-                if (!value) return 'Component Name jest wymagany';
+                if (!value) return i18n.t('val.componentRequired');
                 return null;
             },
             customFixVersion: (value) => {
-                if (!value) return 'Fix Version jest wymagana';
+                if (!value) return i18n.t('val.fixVersionRequired');
                 return null;
             }
         };
@@ -65,7 +65,7 @@ class ValidationService {
     validateField(fieldId, value) {
         const validator = this.validationRules[fieldId];
         if (!validator) {
-            return value ? null : 'Pole jest wymagane';
+            return value ? null : i18n.t('val.fieldRequired');
         }
         return validator(value.trim());
     }
@@ -92,15 +92,11 @@ class ValidationService {
 
     validateStep(stepNumber, config, jqlMode) {
         let fields;
-        
+
         if (stepNumber === CONSTANTS.STEPS.LOGIN) {
             fields = ['jiraUrl', 'jiraEmail', 'jiraApiKey'];
         } else if (stepNumber === CONSTANTS.STEPS.PARAMETERS) {
-            if (jqlMode === CONSTANTS.JQL_MODE.AUTO) {
-                fields = ['fixVersion', 'projectKey', 'componentName'];
-            } else {
-                fields = ['customJql', 'customProjectKey', 'customComponentName', 'customFixVersion'];
-            }
+            fields = ['customJql', 'customProjectKey', 'customComponentName', 'customFixVersion'];
         } else {
             return { isValid: true, results: {} };
         }
@@ -117,35 +113,29 @@ class ValidationService {
     }
 
     validateConfig(config) {
-        let required;
-        
-        if (config.jqlMode === CONSTANTS.JQL_MODE.AUTO) {
-            required = ['jiraUrl', 'jiraEmail', 'jiraApiKey', 'fixVersion', 'projectKey', 'componentName'];
-        } else {
-            required = ['jiraUrl', 'jiraEmail', 'jiraApiKey', 'customJql', 'fixVersion', 'projectKey', 'componentName'];
-        }
+        const required = ['jiraUrl', 'jiraEmail', 'jiraApiKey', 'customJql', 'fixVersion', 'projectKey', 'componentName'];
 
         const getFieldValue = (fieldId) => config[fieldId] || '';
 
         const validation = this.validateFields(required, getFieldValue);
-        
+
         if (!validation.isValid) {
             const firstError = Object.values(validation.results).find(r => r.error);
-            throw new Error(firstError?.error || 'Pole jest wymagane');
+            throw new Error(firstError?.error || i18n.t('val.fieldRequired'));
         }
 
         if (!config.jiraUrl.startsWith('https://')) {
-            throw new Error('Jira URL musi zaczynać się od https://');
+            throw new Error(i18n.t('val.urlMustBeHttps'));
         }
 
         try {
             new URL(config.jiraUrl);
         } catch (urlError) {
-            throw new Error('Nieprawidłowy format URL Jira');
+            throw new Error(i18n.t('val.urlInvalid'));
         }
 
         if (!config.jiraUrl.includes('atlassian.net') && !config.jiraUrl.includes('jira')) {
-            logger.warn('URL może nie być prawidłowym adresem Jira. Sprawdź czy to jest poprawny URL do instancji Jira.');
+            logger.warn(i18n.t('val.urlMayBeInvalid'));
         }
 
         return config;

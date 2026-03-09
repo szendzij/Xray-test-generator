@@ -25,24 +25,16 @@ const CONSTANTS = {
             'jiraUrl',
             'jiraEmail',
             'jiraApiKey',
-            'fixVersion',
-            'projectKey',
-            'componentName',
             'customJql',
             'customProjectKey',
             'customComponentName',
-            'customFixVersion',
-            'jqlMode'
+            'customFixVersion'
         ],
-        THEME_KEY: 'xray-theme'
+        LANG_KEY: 'xray-lang'
     },
     JQL_MODE: {
         AUTO: 'auto',
         CUSTOM: 'custom'
-    },
-    THEME: {
-        LIGHT: 'light',
-        DARK: 'dark'
     },
     STEPS: {
         MIN: 1,

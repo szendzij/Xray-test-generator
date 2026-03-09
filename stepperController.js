@@ -84,6 +84,38 @@ class StepperController {
         this.uiManager.clearLog();
         this.uiManager.hideLog();
         this.uiManager.hideProgress();
+
+        // v2: hide execution card and results summary, reset CTA meta
+        DOMHelper.hideElement('executionCard');
+        DOMHelper.hideElement('resultsSummary');
+        DOMHelper.hideElement('stageIndicator');
+        DOMHelper.setText('executionBadge', 'Idle');
+        DOMHelper.setText('generateMeta', 'Ready');
+        DOMHelper.setText('issueCountBadge', '—');
+    }
+
+    // v2: scroll viewport to the accordion card for a given step number
+    scrollToCard(stepNumber) {
+        const cardMap = { 1: 'credentials', 2: 'query', 3: 'execution' };
+        const cardAttr = cardMap[stepNumber];
+        if (!cardAttr) return;
+        const cardEl = document.querySelector(`[data-card="${cardAttr}"]`) ||
+                       document.getElementById('executionCard');
+        if (cardEl) {
+            cardEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+    }
+
+    // v2: expand a collapsed accordion card by its data-card attribute value
+    expandCard(cardAttr) {
+        const card = document.querySelector(`[data-card="${cardAttr}"]`);
+        if (card) card.classList.remove('collapsed');
+    }
+
+    // v2: collapse an accordion card
+    collapseCard(cardAttr) {
+        const card = document.querySelector(`[data-card="${cardAttr}"]`);
+        if (card) card.classList.add('collapsed');
     }
 
     showStepStatus(message, type = 'info') {
@@ -136,9 +168,7 @@ class StepperController {
 
     getConfigForValidation(jqlMode) {
         const config = {};
-        const fields = jqlMode === CONSTANTS.JQL_MODE.AUTO
-            ? ['jiraUrl', 'jiraEmail', 'jiraApiKey', 'fixVersion', 'projectKey', 'componentName']
-            : ['jiraUrl', 'jiraEmail', 'jiraApiKey', 'customJql', 'customProjectKey', 'customComponentName', 'customFixVersion'];
+        const fields = ['jiraUrl', 'jiraEmail', 'jiraApiKey', 'customJql', 'customProjectKey', 'customComponentName', 'customFixVersion'];
 
         fields.forEach(fieldId => {
             const element = DOMHelper.getElement(fieldId);

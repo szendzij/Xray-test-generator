@@ -3,7 +3,6 @@
 class ConfigManager {
     constructor() {
         this.saveTimeout = null;
-        this.pendingJqlMode = null;
     }
 
     debounce(func, wait) {
@@ -17,70 +16,52 @@ class ConfigManager {
         try {
             const config = await chrome.storage.local.get(CONSTANTS.STORAGE.KEYS);
             CONSTANTS.STORAGE.KEYS.forEach(key => {
-                if (key !== 'jqlMode' && config[key]) DOMHelper.setValue(key, config[key]);
+                if (config[key]) DOMHelper.setValue(key, config[key]);
             });
             return config;
         } catch (error) {
-            logger.error('Błąd podczas ładowania konfiguracji:', error);
+            logger.error(i18n.t('msg.loadConfigError'), error);
             throw error;
         }
     }
 
-    async saveConfig(jqlMode) {
+    async saveConfig() {
         try {
             const config = {
                 jiraUrl: DOMHelper.getValue('jiraUrl'),
                 jiraEmail: DOMHelper.getValue('jiraEmail'),
                 jiraApiKey: DOMHelper.getValue('jiraApiKey'),
-                fixVersion: DOMHelper.getValue('fixVersion'),
-                projectKey: DOMHelper.getValue('projectKey'),
-                componentName: DOMHelper.getValue('componentName'),
                 customJql: DOMHelper.getValue('customJql') || '',
                 customProjectKey: DOMHelper.getValue('customProjectKey') || '',
                 customComponentName: DOMHelper.getValue('customComponentName') || '',
-                customFixVersion: DOMHelper.getValue('customFixVersion') || '',
-                jqlMode: jqlMode || CONSTANTS.JQL_MODE.AUTO
+                customFixVersion: DOMHelper.getValue('customFixVersion') || ''
             };
 
             await chrome.storage.local.set(config);
         } catch (error) {
-            logger.error('Błąd podczas zapisywania konfiguracji:', error);
+            logger.error(i18n.t('msg.saveConfigError'), error);
             throw error;
         }
     }
 
-    getConfig(jqlMode) {
-        if (jqlMode === CONSTANTS.JQL_MODE.AUTO) {
-            return {
-                jiraUrl: DOMHelper.getValue('jiraUrl'),
-                jiraEmail: DOMHelper.getValue('jiraEmail'),
-                jiraApiKey: DOMHelper.getValue('jiraApiKey'),
-                fixVersion: DOMHelper.getValue('fixVersion'),
-                projectKey: DOMHelper.getValue('projectKey'),
-                componentName: DOMHelper.getValue('componentName'),
-                jqlMode: CONSTANTS.JQL_MODE.AUTO
-            };
-        } else {
-            return {
-                jiraUrl: DOMHelper.getValue('jiraUrl'),
-                jiraEmail: DOMHelper.getValue('jiraEmail'),
-                jiraApiKey: DOMHelper.getValue('jiraApiKey'),
-                customJql: DOMHelper.getValue('customJql'),
-                fixVersion: DOMHelper.getValue('customFixVersion'),
-                projectKey: DOMHelper.getValue('customProjectKey'),
-                componentName: DOMHelper.getValue('customComponentName'),
-                jqlMode: CONSTANTS.JQL_MODE.CUSTOM
-            };
-        }
+    getConfig() {
+        return {
+            jiraUrl: DOMHelper.getValue('jiraUrl'),
+            jiraEmail: DOMHelper.getValue('jiraEmail'),
+            jiraApiKey: DOMHelper.getValue('jiraApiKey'),
+            customJql: DOMHelper.getValue('customJql'),
+            fixVersion: DOMHelper.getValue('customFixVersion'),
+            projectKey: DOMHelper.getValue('customProjectKey'),
+            componentName: DOMHelper.getValue('customComponentName'),
+            jqlMode: CONSTANTS.JQL_MODE.CUSTOM
+        };
     }
 
     // Debounced save for auto-save on input
-    saveConfigDebounced(jqlMode) {
-        this.pendingJqlMode = jqlMode;
+    saveConfigDebounced() {
         clearTimeout(this.saveTimeout);
         this.saveTimeout = setTimeout(() => {
-            this.saveConfig(this.pendingJqlMode);
-            this.pendingJqlMode = null;
+            this.saveConfig();
         }, CONSTANTS.TIMEOUTS.DEBOUNCE_SAVE);
     }
 }

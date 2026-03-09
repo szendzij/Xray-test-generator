@@ -18,14 +18,24 @@ class EventListenerManager {
         this.addListener('prevStep3', 'click', () => this.xrayTestGenerator.goToStep(2));
         this.addListener('resetStepper', 'click', () => this.xrayTestGenerator.resetStepper());
 
-        // JQL Mode Toggle
-        this.addListener('autoJqlBtn', 'click', () => this.xrayTestGenerator.switchJqlMode(CONSTANTS.JQL_MODE.AUTO));
-        this.addListener('customJqlBtn', 'click', () => this.xrayTestGenerator.switchJqlMode(CONSTANTS.JQL_MODE.CUSTOM));
+        // Language switcher
+        this.addListener('langPl', 'click', () => i18n.setLanguage('pl'));
+        this.addListener('langEn', 'click', () => i18n.setLanguage('en'));
 
-        // Theme Toggle
-        this.addListener('themeToggle', 'click', () => this.xrayTestGenerator.toggleTheme());
+        // v2: Preview Issue Count button
+        this.addListener('previewIssues', 'click', () => this.xrayTestGenerator.previewIssues());
 
-        // Step clicking
+        // v2: Accordion card collapse/expand via card-header[data-toggle]
+        document.querySelectorAll('[data-toggle]').forEach(header => {
+            const handler = () => {
+                const card = header.closest('.config-card');
+                if (card) card.classList.toggle('collapsed');
+            };
+            header.addEventListener('click', handler);
+            this.listeners.set(`card-toggle-${header.dataset.toggle}`, { element: header, event: 'click', handler });
+        });
+
+        // Step clicking (hidden compat elements — kept for JS state tracking)
         DOMHelper.getElements('.step').forEach(step => {
             const stepNumber = parseInt(step.dataset.step);
             const handler = () => this.xrayTestGenerator.goToStep(stepNumber);
@@ -35,7 +45,7 @@ class EventListenerManager {
 
         // Save config on input change (with debouncing handled by configManager)
         const configFields = [
-            'jiraUrl', 'jiraEmail', 'jiraApiKey', 'fixVersion', 'projectKey', 'componentName',
+            'jiraUrl', 'jiraEmail', 'jiraApiKey',
             'customJql', 'customProjectKey', 'customComponentName', 'customFixVersion'
         ];
 
