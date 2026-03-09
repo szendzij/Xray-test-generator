@@ -97,7 +97,7 @@ class XrayTestGenerator {
             logger.debug('JQL count:', count);
 
             this.stepperController.setConnectionVerified(true);
-            this.showStepStatus(i18n.t('msg.connectionOk', { count }), 'success');
+            this.showStepStatus(i18n.t('msg.connectionOk'), 'success');
             this.uiManager.log(i18n.t('msg.credentialsOk'), 'success');
 
             // v2: update connection dot and label in header

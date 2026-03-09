@@ -43,7 +43,7 @@ const i18n = (() => {
             // ── Dynamic messages ─────────────────────────────────────────
             'msg.checkingConnection': 'Sprawdzanie połączenia...',
             'msg.checkingJql': 'Sprawdzanie zapytania JQL: {jql}',
-            'msg.connectionOk': '✅ Połączenie OK! Znaleziono {count} issues.',
+            'msg.connectionOk': '✅ Połączenie OK!',
             'msg.credentialsOk': 'Poświadczenia OK!',
             'msg.connected': 'Połączono',
             'msg.credentialsVerified': '✓ Zweryfikowano',

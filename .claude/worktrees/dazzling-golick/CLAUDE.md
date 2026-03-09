@@ -15,13 +15,14 @@
 - Use spread `...(condition && { field: value })` to conditionally include optional API fields
 - Mark runtime-only metadata on objects with `_` prefix (e.g. `_wasExisting`) to distinguish from Jira API fields
 - Services return structured objects `{ result, createdCount, skippedCount }` — extend the shape when adding new counters
+- `switchJqlMode(mode)` has an early-return guard `if (this.jqlMode === mode) return` — never pre-set `this.jqlMode` before calling it, or the DOM update will be skipped
 - ADF descriptions built via `jiraService.buildAdfDoc(...paragraphs)` — use this helper instead of inline ADF literals
 - Cache lookups via `jiraService.checkCached(store, key, jql)` — use this helper for any new cache-check/fetch/set patterns
 
 ## UI
 - All styles live in the `<style>` block of `sidepanel.html` — no separate CSS file
 - For visual changes: edit only CSS; never rename or remove HTML element IDs or JS-used class names
-- HTML inputs must NOT have hardcoded `value` attributes — placeholders only on first launch; `loadSavedConfig()` restores values from `chrome.storage.local` on subsequent launches
+- `CONSTANTS.STORAGE.KEYS` includes `jqlMode` (non-DOM key) — exclude it in any loop calling `DOMHelper.setValue()`
 
 ## Environment
 - Windows 11, no `gh` CLI — push branch and open PR via GitHub web URL shown in `git push` output

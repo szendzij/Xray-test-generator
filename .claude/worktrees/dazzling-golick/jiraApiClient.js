@@ -77,7 +77,7 @@ class JiraApiClient {
                 method: 'POST',
                 body: JSON.stringify({ jql })
             });
-            const count = data?.count ?? 0;
+            const count = data?.approximateCount ?? 0;
             logger.debug(`Approximate count successful: ${count}`);
             return count;
         } catch (error) {
@@ -94,7 +94,7 @@ class JiraApiClient {
         const data = await this.searchIssues({
             jql,
             maxResults,
-            fields: ['summary', 'issuetype', 'priority', 'description', 'assignee', 'reporter']
+            fields: ['summary', 'issuetype', 'priority', 'description', 'assignee', 'reporter', 'labels']
         });
         return data?.issues ?? [];
     }

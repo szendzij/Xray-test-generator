@@ -1,6 +1,6 @@
 {
   "manifest_version": 3,
-  "name": "Xray Test Generator v2",
+  "name": "Xray Test Generator",
   "version": "1.0.1",
   "description": "Automatyczne generowanie testów Xray z zadań Jira",
   "icons": {
