@@ -66,18 +66,20 @@ class JiraService {
         if (existingTestCase) return null;
 
         const reporterAccountId = issue.fields.reporter?.accountId;
-        const descriptionText = issue.fields.description
-            ? (typeof issue.fields.description === 'string' ? issue.fields.description : 'Description available in original issue')
-            : '';
+        const sourceDescription = issue.fields.description;
+        const linkParagraph = {
+            type: 'paragraph',
+            content: [{ type: 'text', text: `Test case for issue ${config.jiraUrl}/browse/${issue.key}` }]
+        };
+        const description = (sourceDescription?.type === 'doc' && Array.isArray(sourceDescription.content))
+            ? { type: 'doc', version: 1, content: [linkParagraph, ...sourceDescription.content] }
+            : this.buildAdfDoc(`Test case for issue ${config.jiraUrl}/browse/${issue.key}`);
 
         const testCaseData = {
             fields: {
                 project: { key: config.projectKey },
                 summary: `${issue.key} | ${issue.fields.issuetype.name} | ${issue.fields.summary}`,
-                description: this.buildAdfDoc(
-                    `Test case for issue ${config.jiraUrl}/browse/${issue.key}`,
-                    descriptionText
-                ),
+                description,
                 issuetype: { name: CONSTANTS.ISSUE_TYPES.TEST },
                 priority: { name: issue.fields.priority?.name || 'Medium' },
                 components: [{ name: config.componentName }],
