@@ -200,6 +200,24 @@ class JiraApiClient {
         });
     }
 
+    setXrayClient(xrayApiClient) {
+        this.xrayApiClient = xrayApiClient;
+    }
+
+    async addTestStep(issueId, step) {
+        if (!this.xrayApiClient) {
+            logger.warn('XrayApiClient not set — cannot add test steps');
+            return false;
+        }
+        try {
+            await this.xrayApiClient.addTestStep(issueId, step);
+            return true;
+        } catch (error) {
+            logger.warn(`Could not add test step to issue ${issueId}:`, error);
+            throw error;
+        }
+    }
+
     async linkIssues(inwardKey, outwardKey, linkType = CONSTANTS.TEST_EXECUTION.LINK_TYPE) {
         if (!inwardKey || !outwardKey) {
             return false;

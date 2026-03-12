@@ -106,6 +106,23 @@ const i18n = (() => {
             'msg.loadConfigError': 'Błąd podczas ładowania konfiguracji:',
             'msg.saveConfigError': 'Błąd podczas zapisywania konfiguracji:',
 
+            // ── AI steps ─────────────────────────────────────────────────
+            'label.aiSteps': 'Generuj kroki testowe z AI (Gemini)',
+            'label.xrayClientId': 'Xray Client ID',
+            'label.xrayClientSecret': 'Xray Client Secret',
+            'placeholder.xrayClientId': 'Xray Client ID',
+            'placeholder.xrayClientSecret': 'Xray Client Secret',
+            'label.geminiApiKey': 'Gemini API Key',
+            'placeholder.geminiApiKey': 'AIza...',
+            'msg.stageAi': 'Etap 2.5/6 — Generowanie kroków AI dla {count} testów...',
+            'msg.stepAi': '🤖 Krok 2.5: Generowanie kroków testowych przez AI...',
+            'msg.generatingAiSteps': 'Generowanie kroków AI...',
+            'msg.aiGenerating': 'Generowanie kroków AI {current}/{total}',
+            'msg.aiStepsAdded': '✅ Dodano {count} kroków AI do {key}',
+            'msg.aiStepsError': '⚠️ Błąd AI dla {key}: {message}',
+            'msg.aiStepsSummary': '🤖 Kroki AI: {success} testów zaktualizowanych, {fail} błędów',
+            'msg.aiStepsDone': 'Kroki AI wygenerowane',
+
             // ── Validation ───────────────────────────────────────────────
             'val.urlRequired': 'URL jest wymagany',
             'val.urlHttps': 'URL musi zaczynać się od https://',
@@ -222,6 +239,23 @@ const i18n = (() => {
             'msg.fillRequiredFields': 'Please fill in all required fields in step {step}',
             'msg.loadConfigError': 'Error loading configuration:',
             'msg.saveConfigError': 'Error saving configuration:',
+
+            // ── AI steps ─────────────────────────────────────────────────
+            'label.aiSteps': 'Generate test steps with AI (Gemini)',
+            'label.xrayClientId': 'Xray Client ID',
+            'label.xrayClientSecret': 'Xray Client Secret',
+            'placeholder.xrayClientId': 'Xray Client ID',
+            'placeholder.xrayClientSecret': 'Xray Client Secret',
+            'label.geminiApiKey': 'Gemini API Key',
+            'placeholder.geminiApiKey': 'AIza...',
+            'msg.stageAi': 'Stage 2.5/6 — Generating AI steps for {count} tests...',
+            'msg.stepAi': '🤖 Step 2.5: Generating test steps with AI...',
+            'msg.generatingAiSteps': 'Generating AI steps...',
+            'msg.aiGenerating': 'Generating AI steps {current}/{total}',
+            'msg.aiStepsAdded': '✅ Added {count} AI steps to {key}',
+            'msg.aiStepsError': '⚠️ AI error for {key}: {message}',
+            'msg.aiStepsSummary': '🤖 AI steps: {success} tests updated, {fail} errors',
+            'msg.aiStepsDone': 'AI steps generated',
 
             // ── Validation ───────────────────────────────────────────────
             'val.urlRequired': 'URL is required',

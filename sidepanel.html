@@ -670,6 +670,62 @@
         }
 
         /* ================================================
+           AI TOGGLE SWITCH
+           ================================================ */
+        .ai-section {
+            border-top: 1px solid var(--glass-border);
+            margin-top: 10px;
+            padding-top: 10px;
+        }
+
+        .toggle-label {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+            text-transform: none;
+            letter-spacing: 0;
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-secondary);
+        }
+
+        .toggle-checkbox { display: none; }
+
+        .toggle-switch {
+            width: 34px;
+            height: 18px;
+            background: rgba(255, 255, 255, 0.10);
+            border: 1px solid var(--glass-border);
+            border-radius: 9px;
+            position: relative;
+            flex-shrink: 0;
+            transition: background 0.2s, border-color 0.2s;
+        }
+
+        .toggle-switch::after {
+            content: '';
+            position: absolute;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: var(--text-muted);
+            top: 2px;
+            left: 2px;
+            transition: transform 0.2s, background 0.2s;
+        }
+
+        .toggle-checkbox:checked + .toggle-switch {
+            background: rgba(124, 58, 237, 0.4);
+            border-color: rgba(124, 58, 237, 0.6);
+        }
+
+        .toggle-checkbox:checked + .toggle-switch::after {
+            transform: translateX(16px);
+            background: #c4b5fd;
+        }
+
+        /* ================================================
            RESPONSIVE
            ================================================ */
         @media (max-width: 380px) {
@@ -779,6 +835,39 @@
                             <input type="text" id="customComponentName" placeholder="5ways">
                             <div id="customComponentNameError" class="validation-error hidden"></div>
                         </div>
+                </div>
+
+                <!-- AI Test Steps -->
+                <div class="ai-section">
+                    <div class="form-group">
+                        <label class="toggle-label">
+                            <input type="checkbox" id="useAiSteps" class="toggle-checkbox">
+                            <span class="toggle-switch"></span>
+                            <span data-i18n="label.aiSteps">Generate test steps with AI (Gemini)</span>
+                        </label>
+                    </div>
+                    <div id="aiStepsConfig" class="hidden">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="xrayClientId" data-i18n="label.xrayClientId">Xray Client ID</label>
+                                <input type="password" id="xrayClientId"
+                                    data-i18n-placeholder="placeholder.xrayClientId"
+                                    placeholder="Xray Client ID">
+                            </div>
+                            <div class="form-group">
+                                <label for="xrayClientSecret" data-i18n="label.xrayClientSecret">Xray Client Secret</label>
+                                <input type="password" id="xrayClientSecret"
+                                    data-i18n-placeholder="placeholder.xrayClientSecret"
+                                    placeholder="Xray Client Secret">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="geminiApiKey" data-i18n="label.geminiApiKey">Gemini API Key</label>
+                            <input type="password" id="geminiApiKey"
+                                data-i18n-placeholder="placeholder.geminiApiKey"
+                                placeholder="AIza...">
+                        </div>
+                    </div>
                 </div>
 
                 <button id="previewIssues" class="btn-secondary btn-preview"
@@ -894,6 +983,8 @@
     <!-- Jira modules -->
     <script src="jiraApiClient.js"></script>
     <script src="jiraService.js"></script>
+    <script src="llmApiClient.js"></script>
+    <script src="xrayApiClient.js"></script>
 
     <!-- UI modules -->
     <script src="uiManager.js"></script>

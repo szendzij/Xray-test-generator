@@ -9,7 +9,10 @@
       "Bash(where:*)",
       "Skill(claude-md-management:revise-claude-md)",
       "Skill(claude-md-management:revise-claude-md:*)",
-      "Bash(git commit:*)"
+      "Bash(git commit:*)",
+      "WebFetch(domain:docs.getxray.app)",
+      "WebFetch(domain:xray.cloud.getxray.app)",
+      "WebFetch(domain:eu.xray.cloud.getxray.app)"
     ]
   }
 }

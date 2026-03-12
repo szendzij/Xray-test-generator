@@ -59,6 +59,8 @@ const CONSTANTS = {
         FETCH_ISSUES_COMPLETE: 20,
         CREATE_TEST_CASES_START: 20,
         CREATE_TEST_CASES_COMPLETE: 60,
+        AI_STEPS_START: 62,
+        AI_STEPS_COMPLETE: 68,
         CREATE_TEST_PLAN_START: 70,
         CREATE_TEST_PLAN_COMPLETE: 80,
         LINK_TEST_CASES: 85,
@@ -66,6 +68,14 @@ const CONSTANTS = {
         COMPLETE: 100
     },
     DEFAULT_MAX_RESULTS: 500,
+    XRAY: {
+        BASE_URL: 'https://eu.xray.cloud.getxray.app'
+    },
+    LLM: {
+        GEMINI_ENDPOINT: 'https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite-preview:generateContent',
+        MAX_RETRIES: 3,
+        RETRY_FALLBACK_DELAY_MS: 20000
+    },
     ISSUE_TYPES: {
         TEST: 'Test',
         TEST_PLAN: 'Test Plan',

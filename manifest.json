@@ -10,7 +10,7 @@
     "128": "icon128.png"
   },
   "permissions": ["storage", "activeTab", "scripting", "sidePanel"],
-  "host_permissions": ["https://*.atlassian.net/*", "https://*.jira.com/*"],
+  "host_permissions": ["https://*.atlassian.net/*", "https://*.jira.com/*", "https://generativelanguage.googleapis.com/*", "https://eu.xray.cloud.getxray.app/*"],
   "action": {
     "default_title": "Xray Test Generator"
   },

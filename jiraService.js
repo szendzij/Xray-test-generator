@@ -16,6 +16,30 @@ class JiraService {
 
     // --- Helpers ---
 
+    extractAdfText(adf) {
+        if (!adf || typeof adf !== 'object') return '';
+        const extractNode = (node) => {
+            if (!node) return '';
+            if (node.type === 'text') return node.text || '';
+            if (Array.isArray(node.content)) return node.content.map(extractNode).join(' ');
+            return '';
+        };
+        return extractNode(adf).replace(/\s+/g, ' ').trim().substring(0, 2000);
+    }
+
+    async addTestStepsToTestCase(testCase, steps) {
+        // Xray Cloud GraphQL requires numeric issueId, not the key
+        const issueId = testCase.id || testCase.key;
+        for (const step of steps) {
+            await this.apiClient.addTestStep(issueId, {
+                action: step.action || '',
+                data: step.data || '',
+                result: step.result || ''
+            });
+            await new Promise(resolve => setTimeout(resolve, CONSTANTS.TIMEOUTS.LINK_DELAY));
+        }
+    }
+
     buildAdfDoc(...paragraphs) {
         return {
             type: "doc",
@@ -51,13 +75,13 @@ class JiraService {
 
     async checkExistingTestPlan(config) {
         const cacheKey = `${config.projectKey}-${config.fixVersion}`;
-        const jql = `project = ${config.projectKey} AND issuetype = "${CONSTANTS.ISSUE_TYPES.TEST_PLAN}" AND fixVersion = "${config.fixVersion}" AND summary ~ "\"Test Plan for Release ${config.fixVersion}\""`;
+        const jql = `project = ${config.projectKey} AND issuetype = "${CONSTANTS.ISSUE_TYPES.TEST_PLAN}" AND fixVersion = "${config.fixVersion}" AND summary ~ '"Test Plan for Release ${config.fixVersion}"'`;
         return this.checkCached('testPlans', cacheKey, jql);
     }
 
     async checkExistingTestExecution(prefix, config) {
         const cacheKey = `${config.projectKey}-${config.fixVersion}-${prefix}`;
-        const jql = `project = ${config.projectKey} AND issuetype = "${CONSTANTS.ISSUE_TYPES.TEST_EXECUTION}" AND fixVersion = "${config.fixVersion}" AND summary ~ "\"${prefix} Test execution for Release ${config.fixVersion}\""`;
+        const jql = `project = ${config.projectKey} AND issuetype = "${CONSTANTS.ISSUE_TYPES.TEST_EXECUTION}" AND fixVersion = "${config.fixVersion}" AND summary ~ '"${prefix} Test execution for Release ${config.fixVersion}"'`;
         return this.checkCached('testExecutions', cacheKey, jql);
     }
 

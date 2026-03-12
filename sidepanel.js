@@ -187,6 +187,11 @@ class XrayTestGenerator {
             const errorHandler = new ErrorHandler();
             this.jiraService = new JiraService(config, errorHandler);
 
+            if (config.useAiSteps && config.xrayClientId && config.xrayClientSecret) {
+                const xrayClient = new XrayApiClient(config.xrayClientId, config.xrayClientSecret);
+                this.jiraService.apiClient.setXrayClient(xrayClient);
+            }
+
             this.uiManager.log(i18n.t('msg.starting'), 'info');
             this.uiManager.showProgress(CONSTANTS.PROGRESS.INITIALIZATION, i18n.t('msg.stage1Init'));
 
@@ -204,13 +209,18 @@ class XrayTestGenerator {
             }
 
             // Step 2: Create Test Cases
-            const { testCases, createdCount, skippedCount } = await this.createTestCases(issues, config);
+            const { testCases, createdCount, skippedCount, issueMap } = await this.createTestCases(issues, config);
 
             if (testCases.length === 0) {
                 this.showStepStatus(i18n.t('msg.noNewTestCases'), 'info');
                 this.uiManager.showElement('resetStepper');
                 this.uiManager.setButtonDisabled('generateTests', false);
                 return;
+            }
+
+            // Step 2.5: Generate AI test steps (optional)
+            if (config.useAiSteps && config.geminiApiKey) {
+                await this.generateAiTestSteps(testCases, issueMap, config);
             }
 
             // Step 3: Create or get Test Plan
@@ -259,6 +269,7 @@ class XrayTestGenerator {
         this.setStage(i18n.t('msg.stage2', { count: issues.length }));
         this.uiManager.log(i18n.t('msg.step2'), 'info');
         const testCases = [];
+        const issueMap = new Map(); // testCase.key → source issue
         let createdCount = 0;
         let skippedCount = 0;
 
@@ -272,6 +283,7 @@ class XrayTestGenerator {
                 const testCase = await this.jiraService.createTestCase(issue, config);
                 if (testCase) {
                     testCases.push(testCase);
+                    issueMap.set(testCase.key, issue);
                     createdCount++;
                     this.uiManager.log(i18n.t('msg.testCaseCreated', { key: testCase.key, issueKey: issue.key }), 'success');
                 } else {
@@ -289,7 +301,44 @@ class XrayTestGenerator {
         this.uiManager.log(i18n.t('msg.testCasesSummary', { created: createdCount, skipped: skippedCount }), 'info');
         this.uiManager.showProgress(CONSTANTS.PROGRESS.CREATE_TEST_CASES_COMPLETE, i18n.t('msg.testCasesCreatedCount', { count: createdCount }));
 
-        return { testCases, createdCount, skippedCount };
+        return { testCases, createdCount, skippedCount, issueMap };
+    }
+
+    async generateAiTestSteps(testCases, issueMap, config) {
+        this.setStage(i18n.t('msg.stageAi', { count: testCases.length }));
+        this.uiManager.log(i18n.t('msg.stepAi'), 'info');
+        this.uiManager.showProgress(CONSTANTS.PROGRESS.AI_STEPS_START, i18n.t('msg.generatingAiSteps'));
+
+        const llmClient = new LlmApiClient(config.geminiApiKey);
+        let successCount = 0;
+        let failCount = 0;
+
+        for (let i = 0; i < testCases.length; i++) {
+            const testCase = testCases[i];
+            const sourceIssue = issueMap.get(testCase.key);
+            if (!sourceIssue) continue;
+
+            this.uiManager.showProgress(
+                CONSTANTS.PROGRESS.AI_STEPS_START + (i / testCases.length) * (CONSTANTS.PROGRESS.AI_STEPS_COMPLETE - CONSTANTS.PROGRESS.AI_STEPS_START),
+                i18n.t('msg.aiGenerating', { current: i + 1, total: testCases.length })
+            );
+
+            try {
+                const description = this.jiraService.extractAdfText(sourceIssue.fields.description);
+                const steps = await llmClient.generateTestSteps(sourceIssue.fields.summary, description);
+                await this.jiraService.addTestStepsToTestCase(testCase, steps);
+                successCount++;
+                this.uiManager.log(i18n.t('msg.aiStepsAdded', { key: testCase.key, count: steps.length }), 'success');
+            } catch (error) {
+                failCount++;
+                this.uiManager.log(i18n.t('msg.aiStepsError', { key: testCase.key, message: error.message }), 'warning');
+            }
+
+            await new Promise(resolve => setTimeout(resolve, CONSTANTS.TIMEOUTS.API_DELAY));
+        }
+
+        this.uiManager.log(i18n.t('msg.aiStepsSummary', { success: successCount, fail: failCount }), 'info');
+        this.uiManager.showProgress(CONSTANTS.PROGRESS.AI_STEPS_COMPLETE, i18n.t('msg.aiStepsDone'));
     }
 
     async createOrGetTestPlan(testCases, config) {

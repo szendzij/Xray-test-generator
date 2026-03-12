@@ -43,10 +43,25 @@ class EventListenerManager {
             this.listeners.set(`step-${stepNumber}`, { element: step, event: 'click', handler });
         });
 
+        // AI Steps toggle — show/hide Gemini API Key field
+        const useAiStepsEl = document.getElementById('useAiSteps');
+        if (useAiStepsEl) {
+            const handler = () => {
+                const aiConfig = document.getElementById('aiStepsConfig');
+                if (aiConfig) aiConfig.classList.toggle('hidden', !useAiStepsEl.checked);
+                this.xrayTestGenerator.onConfigInputChange();
+            };
+            useAiStepsEl.addEventListener('change', handler);
+            this.listeners.set('useAiSteps-change', { element: useAiStepsEl, event: 'change', handler });
+        }
+
         // Save config on input change (with debouncing handled by configManager)
         const configFields = [
             'jiraUrl', 'jiraEmail', 'jiraApiKey',
-            'customJql', 'customProjectKey', 'customComponentName', 'customFixVersion'
+            'customJql', 'customProjectKey', 'customComponentName', 'customFixVersion',
+            'geminiApiKey',
+            'xrayClientId',
+            'xrayClientSecret'
         ];
 
         configFields.forEach(id => {
