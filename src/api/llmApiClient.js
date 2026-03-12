@@ -6,21 +6,33 @@ class LlmApiClient {
     }
 
     async generateTestSteps(issueSummary, issueDescription, attempt = 0) {
-        const prompt = `You are a QA engineer. Based on the following Jira issue, generate 3-7 happy path manual test steps.
-        Answers must be in Polish.
+        const prompt = `Role: You are a Senior Manual QA Engineer with expertise in black-box testing.
 
+Context: You are analyzing a new Jira issue to prepare manual test execution steps. You test software strictly from the end-user's perspective. You do not have access to the source code and you are completely technology-agnostic.
+
+Goal: Generate a "Happy Path" manual test scenario (positive flow only, no edge cases, no error handling) based on the provided Jira summary and description. 
+
+Language: All generated text inside the JSON output (actions, results, data) MUST be in Polish.
+
+Constraints & Rules:
+1. STRICT LENGTH: You MUST generate a minimum of 3 and a maximum of 7 test steps. Do not exceed 7 steps under any circumstances.
+2. NO HALLUCINATIONS & NO TECH STACK: Do NOT mention, guess, or append any programming languages, frameworks (e.g., React, Angular), databases, automation tools, or specific software versions UNLESS they are explicitly written in the provided Jira description. Focus solely on functional UI/API behavior.
+3. Step Quality: Each step must be a concrete, directly testable action. Keep the "action" and "result" fields short, clear, and imperative.
+4. Data Field: Provide specific mock test data/input values in the "data" field if the step requires user input. If no input is needed, leave it as exactly "".
+
+Output Format:
+Respond ONLY with a valid, raw JSON array. 
+CRITICAL: Do not use Markdown formatting, do not use json code blocks, do not add any greetings, summaries, or explanations. Start immediately with [ and end with ].
+
+Example Output format:
+[
+  {"action": "Otwórz stronę logowania", "data": "", "result": "Wyświetla się formularz logowania"},
+  {"action": "Wprowadź poprawne dane logowania", "data": "user@example.com / ValidPass123", "result": "Pola logowania i hasła zostały wypełnione"}
+]
+
+Input Data:
 Issue summary: ${issueSummary}
-Issue description: ${issueDescription || '(no description provided)'}
-
-Rules:
-- Only happy path (positive scenario, no error cases)
-- Each step must be concrete and directly testable
-- Keep action and result short and clear
-- "data" field: specific test data/input values if needed, otherwise empty string
-
-Respond ONLY with a valid JSON array. No markdown, no explanation, no code blocks.
-Example format:
-[{"action":"Open login page","data":"","result":"Login form is displayed"},{"action":"Enter credentials","data":"user@example.com / ValidPass123","result":"Fields are filled"}]`;
+Issue description: ${issueDescription || '(no description provided)'}`;
 
         const response = await fetch(`${CONSTANTS.LLM.GEMINI_ENDPOINT}?key=${this.apiKey}`, {
             method: 'POST',

@@ -968,31 +968,31 @@
     </div>
 
     <!-- i18n — must be first, no dependencies -->
-    <script src="i18n.js"></script>
+    <script src="src/utils/i18n.js"></script>
 
     <!-- Core modules -->
-    <script src="constants.js"></script>
-    <script src="logger.js"></script>
-    <script src="domHelper.js"></script>
+    <script src="src/utils/constants.js"></script>
+    <script src="src/utils/logger.js"></script>
+    <script src="src/utils/domHelper.js"></script>
 
     <!-- Services -->
-    <script src="validationService.js"></script>
-    <script src="configManager.js"></script>
-    <script src="errorHandler.js"></script>
+    <script src="src/utils/validationService.js"></script>
+    <script src="src/utils/configManager.js"></script>
+    <script src="src/utils/errorHandler.js"></script>
 
     <!-- Jira modules -->
-    <script src="jiraApiClient.js"></script>
-    <script src="jiraService.js"></script>
-    <script src="llmApiClient.js"></script>
-    <script src="xrayApiClient.js"></script>
+    <script src="src/api/jiraApiClient.js"></script>
+    <script src="src/services/jiraService.js"></script>
+    <script src="src/api/llmApiClient.js"></script>
+    <script src="src/api/xrayApiClient.js"></script>
 
     <!-- UI modules -->
-    <script src="uiManager.js"></script>
-    <script src="stepperController.js"></script>
-    <script src="eventListenerManager.js"></script>
+    <script src="src/ui/uiManager.js"></script>
+    <script src="src/ui/stepperController.js"></script>
+    <script src="src/ui/eventListenerManager.js"></script>
 
     <!-- Main application -->
-    <script src="sidepanel.js"></script>
+    <script src="src/core/sidepanel.js"></script>
 </body>
 
 </html>

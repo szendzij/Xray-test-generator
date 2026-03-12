@@ -12,7 +12,8 @@
       "Bash(git commit:*)",
       "WebFetch(domain:docs.getxray.app)",
       "WebFetch(domain:xray.cloud.getxray.app)",
-      "WebFetch(domain:eu.xray.cloud.getxray.app)"
+      "WebFetch(domain:eu.xray.cloud.getxray.app)",
+      "Bash(cd \"C:\\\\Users\\\\PC17.PC-17\\\\Documents\\\\ChromeAddon\\\\xray-test-generator-v2\" && mkdir -p src/api src/services src/ui src/utils src/core assets docs)"
     ]
   }
 }
