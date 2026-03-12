@@ -41,5 +41,5 @@
 ## Environment
 - Windows 11, no `gh` CLI — push branch and open PR via GitHub web URL shown in `git push` output
 - Any new `fetch()` target must be in `host_permissions` in `manifest.json` — Chrome blocks all other origins (CORS error)
-- Worktree path: `.claude/worktrees/dazzling-golick`, main repo: root of `Xray-test-generator`
 - Chrome extension loads from the ROOT dir (main branch), NOT from worktrees — fixes must also land on main to be visible in the loaded extension
+- `test-config.json` — local dev reference/documentation file (stays in root); not used at runtime
