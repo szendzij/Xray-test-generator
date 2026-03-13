@@ -1,87 +1,115 @@
-# Instrukcja instalacji Xray Test Generator
+# Instrukcja instalacji — Xray Test Generator v2
 
 ## Krok po kroku
 
-### 1. Przygotowanie rozszerzenia
-1. Pobierz lub skopiuj folder `chrome-extension` na swój komputer
-2. Upewnij się, że wszystkie pliki są w folderze:
-   - `manifest.json`
-   - `popup.html`
-   - `popup.js`
-   - `background.js`
-   - `content.js`
-   - `README.md`
+### 1. Przygotowanie
+
+Upewnij się, że masz folder projektu z następującą strukturą:
+```
+xray-test-generator-v2/
+├── manifest.json
+├── sidepanel.html
+├── src/
+│   ├── core/   (sidepanel.js, background.js, content.js)
+│   ├── api/    (jiraApiClient.js, llmApiClient.js, xrayApiClient.js)
+│   ├── services/ (jiraService.js)
+│   ├── ui/     (uiManager.js, stepperController.js, eventListenerManager.js)
+│   └── utils/  (constants.js, logger.js, domHelper.js, ...)
+└── assets/     (icon*.png)
+```
 
 ### 2. Instalacja w Chrome
+
 1. Otwórz przeglądarkę Chrome
 2. Przejdź do `chrome://extensions/`
 3. W prawym górnym rogu włącz **"Tryb dewelopera"** (Developer mode)
 4. Kliknij **"Załaduj rozpakowane"** (Load unpacked)
-5. Wybierz folder `chrome-extension`
+5. Wybierz **główny folder** projektu (`xray-test-generator-v2/`) — ten, w którym leży `manifest.json`
 6. Kliknij **"Wybierz folder"**
 
 ### 3. Weryfikacja instalacji
-- Rozszerzenie powinno pojawić się na liście zainstalowanych rozszerzeń
-- Ikona 🚀 powinna pojawić się w pasku narzędzi Chrome
-- Jeśli ikona nie jest widoczna, kliknij ikonę puzzli (🧩) w pasku narzędzi i przypnij rozszerzenie
 
-### 4. Pierwsza konfiguracja
-1. Kliknij ikonę rozszerzenia 🚀
-2. Wypełnij pola konfiguracyjne:
-   - **Jira Base URL**: `https://wfirma.atlassian.net`
-   - **Jira Email**: Twój email w systemie Jira
-   - **Jira API Key**: Klucz API (wygeneruj w ustawieniach konta Jira)
-   - **Fix Version**: `25.9` (lub inna wersja)
-   - **Project Key**: `RES`
-   - **Component Name**: `5ways`
+- Rozszerzenie powinno pojawić się na liście z nazwą "Xray Test Generator v2"
+- Ikona pojawi się w pasku narzędzi Chrome
+- Jeśli ikona nie jest widoczna, kliknij ikonę puzzli (🧩) w pasku i przypnij rozszerzenie
 
-### 5. Test połączenia
-1. Kliknij **"🔍 Sprawdź połączenie"**
-2. Jeśli wszystko jest OK, zobaczysz komunikat o liczbie znalezionych zadań
-3. Jeśli wystąpi błąd, sprawdź konfigurację
+### 4. Pierwsze uruchomienie
 
-### 6. Generowanie testów
-1. Kliknij **"🚀 Generuj testy"**
-2. Obserwuj postęp w logach
-3. Po zakończeniu zobaczysz podsumowanie
+Kliknij ikonę rozszerzenia — otworzy się **panel boczny** po prawej stronie Chrome.
+
+#### Zakładka 1 — Credentials
+Wypełnij dane dostępowe do Jira:
+- **Jira Base URL**: `https://wfirma.atlassian.net` (lub adres Twojej instancji)
+- **Jira Email**: Twój email w systemie Jira
+- **Jira API Key**: Token API (patrz sekcja poniżej)
+
+Kliknij **"Sprawdź połączenie"** — przy sukcesie zobaczysz zieloną kropkę i liczbę zadań.
+
+#### Zakładka 2 — Parametry zapytania
+- **JQL Query**: Wpisz zapytanie JQL, np.:
+  `project = RES AND fixVersion = "25.9" AND issuetype in (Bug, Task)`
+- **Project Key**: `RES`
+- **Component Name**: `5ways`
+- **Fix Version**: `25.9`
+
+#### Opcjonalnie — Generowanie kroków AI
+Zaznacz checkbox **"Generuj kroki testowe przez AI"** i podaj:
+- **Xray Client ID** + **Xray Client Secret** — z ustawień Xray Cloud
+- **Gemini API Key** — z [aistudio.google.com](https://aistudio.google.com)
+
+### 5. Generowanie testów
+
+1. Kliknij **"Generuj testy"**
+2. Obserwuj pasek postępu i log w czasie rzeczywistym
+3. Po zakończeniu pojawi się podsumowanie:
+   - **Tests** — liczba nowo utworzonych Test Cases
+   - **Plans** — 1 jeśli Test Plan został utworzony, 0 jeśli już istniał
+   - **Executions** — liczba nowo utworzonych Test Executions
+   - **Links** — łączna liczba powiązań
 
 ## Generowanie API Key w Jira
 
 1. Zaloguj się do Jira
-2. Kliknij na swój awatar w prawym górnym rogu
-3. Wybierz **"Account settings"**
-4. W menu po lewej stronie kliknij **"Security"**
-5. W sekcji **"API tokens"** kliknij **"Create API token"**
-6. Nadaj nazwę tokenowi (np. "Xray Test Generator")
-7. Skopiuj wygenerowany token i wklej go w rozszerzeniu
+2. Kliknij na swój awatar (prawy górny róg) → **"Account settings"**
+3. W menu po lewej kliknij **"Security"**
+4. W sekcji **"API tokens"** kliknij **"Create API token"**
+5. Nadaj nazwę (np. "Xray Test Generator") i skopiuj wygenerowany token
+
+## Generowanie Xray Client ID/Secret
+
+1. Zaloguj się do Xray Cloud (`xray.cloud.getxray.app`)
+2. Przejdź do **Settings → API Keys**
+3. Utwórz nowy klucz i skopiuj Client ID oraz Client Secret
+
+## Aktualizacja rozszerzenia
+
+1. Zastąp pliki w folderze projektu nowymi wersjami
+2. Przejdź do `chrome://extensions/`
+3. Kliknij ikonę odświeżania (🔄) przy rozszerzeniu lub kliknij **"Aktualizuj"**
 
 ## Rozwiązywanie problemów
 
 ### Rozszerzenie się nie instaluje
-- Sprawdź czy wszystkie pliki są w folderze
+- Sprawdź czy wybrano główny folder (z `manifest.json`), nie podfolder
 - Upewnij się, że tryb dewelopera jest włączony
-- Spróbuj odświeżyć stronę `chrome://extensions/`
+- Odśwież stronę `chrome://extensions/`
 
-### Błąd połączenia z API
-- Sprawdź czy URL Jira jest poprawny
+### Czerwona kropka / błąd połączenia
+- Sprawdź poprawność URL Jira (musi zaczynać się od `https://`)
 - Zweryfikuj czy API Key jest aktualny
-- Upewnij się, że masz uprawnienia do API
+- Sprawdź czy JQL jest poprawny (kliknij "Podejrzyj wyniki" dla testu)
 
 ### Błąd tworzenia testów
-- Sprawdź czy masz uprawnienia do tworzenia Test Cases w projekcie
-- Zweryfikuj czy komponent "5ways" istnieje w projekcie
-- Upewnij się, że fix version "FFFV" istnieje w projekcie
+- Sprawdź czy masz uprawnienia do tworzenia zadań typu Test/Test Plan/Test Execution
+- Zweryfikuj czy komponent i fix version istnieją w projekcie Jira
 
-## Aktualizacja rozszerzenia
-
-1. Zastąp pliki w folderze `chrome-extension` nowymi wersjami
-2. Przejdź do `chrome://extensions/`
-3. Kliknij ikonę odświeżania (🔄) przy rozszerzeniu
-4. Rozszerzenie zostanie zaktualizowane
+### Kroki AI nie są generowane
+- Sprawdź czy Gemini API Key jest aktywny i ma dostępny limit
+- Sprawdź Xray Client ID/Secret — token jest odświeżany co 23h
+- W konsoli DevTools sprawdź logi: `chrome://extensions/` → "Zbadaj widoki" → "side panel"
 
 ## Odinstalowanie
 
 1. Przejdź do `chrome://extensions/`
-2. Znajdź "Xray Test Generator"
-3. Kliknij **"Usuń"** (Remove)
-4. Potwierdź usunięcie
+2. Znajdź "Xray Test Generator v2"
+3. Kliknij **"Usuń"** (Remove) i potwierdź
