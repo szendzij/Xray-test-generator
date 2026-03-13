@@ -6,13 +6,23 @@ class LlmApiClient {
     }
 
     async generateTestSteps(issueSummary, issueDescription, attempt = 0) {
+        const lang = (typeof i18n !== 'undefined' ? i18n.lang : null) || 'pl';
+        const isEn = lang === 'en';
+        const languageLine = isEn
+            ? 'Language: All generated text inside the JSON output (actions, results, data) MUST be in English.'
+            : 'Language: All generated text inside the JSON output (actions, results, data) MUST be in Polish.';
+        const exampleJson = isEn
+            ? `[\n  {"action": "Open the login page", "data": "", "result": "The login form is displayed"},\n  {"action": "Enter valid credentials", "data": "user@example.com / ValidPass123", "result": "The login and password fields are filled in"}\n]`
+            : `[\n  {"action": "Otwórz stronę logowania", "data": "", "result": "Wyświetla się formularz logowania"},\n  {"action": "Wprowadź poprawne dane logowania", "data": "user@example.com / ValidPass123", "result": "Pola logowania i hasła zostały wypełnione"}\n]`;
+        const noDescriptionLabel = isEn ? '(no description provided)' : '(brak opisu)';
+
         const prompt = `Role: You are a Senior Manual QA Engineer with expertise in black-box testing.
 
 Context: You are analyzing a new Jira issue to prepare manual test execution steps. You test software strictly from the end-user's perspective. You do not have access to the source code and you are completely technology-agnostic.
 
-Goal: Generate a "Happy Path" manual test scenario (positive flow only, no edge cases, no error handling) based on the provided Jira summary and description. 
+Goal: Generate a "Happy Path" manual test scenario (positive flow only, no edge cases, no error handling) based on the provided Jira summary and description.
 
-Language: All generated text inside the JSON output (actions, results, data) MUST be in Polish.
+${languageLine}
 
 Constraints & Rules:
 1. STRICT LENGTH: You MUST generate a minimum of 3 and a maximum of 7 test steps. Do not exceed 7 steps under any circumstances.
@@ -21,18 +31,15 @@ Constraints & Rules:
 4. Data Field: Provide specific mock test data/input values in the "data" field if the step requires user input. If no input is needed, leave it as exactly "".
 
 Output Format:
-Respond ONLY with a valid, raw JSON array. 
+Respond ONLY with a valid, raw JSON array.
 CRITICAL: Do not use Markdown formatting, do not use json code blocks, do not add any greetings, summaries, or explanations. Start immediately with [ and end with ].
 
 Example Output format:
-[
-  {"action": "Otwórz stronę logowania", "data": "", "result": "Wyświetla się formularz logowania"},
-  {"action": "Wprowadź poprawne dane logowania", "data": "user@example.com / ValidPass123", "result": "Pola logowania i hasła zostały wypełnione"}
-]
+${exampleJson}
 
 Input Data:
 Issue summary: ${issueSummary}
-Issue description: ${issueDescription || '(no description provided)'}`;
+Issue description: ${issueDescription || noDescriptionLabel}`;
 
         const response = await fetch(`${CONSTANTS.LLM.GEMINI_ENDPOINT}?key=${this.apiKey}`, {
             method: 'POST',

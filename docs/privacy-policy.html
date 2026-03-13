@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Privacy Policy — Xray Test Generator</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 40px 24px;
+      color: #222;
+      line-height: 1.7;
+    }
+    h1 { font-size: 1.8rem; margin-bottom: 4px; }
+    h2 { font-size: 1.1rem; margin-top: 2rem; color: #111; }
+    .meta { color: #666; font-size: 0.9rem; margin-bottom: 2.5rem; }
+    ul { padding-left: 1.4rem; }
+    li { margin-bottom: 6px; }
+    a { color: #0060df; }
+    hr { border: none; border-top: 1px solid #e0e0e0; margin: 2.5rem 0; }
+    .lang-switch { text-align: right; margin-bottom: 1.5rem; font-size: 0.9rem; }
+    .lang-switch a { margin-left: 8px; }
+    #en { display: none; }
+  </style>
+  <script>
+    function showLang(lang) {
+      document.getElementById('pl').style.display = lang === 'pl' ? '' : 'none';
+      document.getElementById('en').style.display = lang === 'en' ? '' : 'none';
+    }
+  </script>
+</head>
+<body>
+
+  <div class="lang-switch">
+    <a href="#" onclick="showLang('pl'); return false;">🇵🇱 Polski</a>
+    <a href="#" onclick="showLang('en'); return false;">🇬🇧 English</a>
+  </div>
+
+  <!-- POLISH -->
+  <div id="pl">
+    <h1>Polityka prywatności</h1>
+    <p class="meta">Rozszerzenie: <strong>Xray Test Generator</strong><br>
+    Ostatnia aktualizacja: 13 marca 2026</p>
+
+    <h2>1. Kto jest administratorem danych</h2>
+    <p>Rozszerzenie jest narzędziem deweloperskim działającym wyłącznie po stronie klienta.
+    Deweloper rozszerzenia nie gromadzi, nie przetwarza ani nie ma dostępu do żadnych
+    danych użytkownika. Wszystkie dane pozostają na urządzeniu użytkownika lub są
+    przekazywane bezpośrednio do usług konfigurowanych przez samego użytkownika.</p>
+
+    <h2>2. Jakie dane są przetwarzane</h2>
+    <p>Rozszerzenie przetwarza następujące dane podane dobrowolnie przez użytkownika:</p>
+    <ul>
+      <li><strong>Adres URL instancji Jira</strong> (np. <code>https://firma.atlassian.net</code>)</li>
+      <li><strong>Adres e-mail</strong> konta Jira</li>
+      <li><strong>Klucz API Jira</strong> — token uwierzytelniający do Jira Cloud</li>
+      <li><strong>Klucz projektu, komponent, wersja</strong> — parametry konfiguracyjne</li>
+      <li><strong>Zapytanie JQL</strong> — filtr wyboru zadań</li>
+      <li><strong>Xray Client ID / Client Secret</strong> (opcjonalnie) — dane do Xray Cloud</li>
+      <li><strong>Klucz API Google Gemini</strong> (opcjonalnie) — do generowania kroków AI</li>
+    </ul>
+
+    <h2>3. Gdzie dane są przechowywane</h2>
+    <p>Wszystkie powyższe dane są przechowywane <strong>wyłącznie lokalnie</strong>
+    w przeglądarce użytkownika przy użyciu <code>chrome.storage.local</code>.
+    Deweloper rozszerzenia nie ma do nich żadnego dostępu.</p>
+
+    <h2>4. Do jakich zewnętrznych usług dane są wysyłane</h2>
+    <p>Dane są przesyłane wyłącznie do usług wskazanych przez użytkownika w konfiguracji:</p>
+    <ul>
+      <li><strong>Jira Cloud (Atlassian)</strong> — adres e-mail i klucz API służą
+        do autoryzacji żądań REST API (tworzenie zadań, wyszukiwanie, linkowanie).
+        Dane trafiają wyłącznie na instancję Jira wskazaną przez użytkownika.</li>
+      <li><strong>Xray Cloud</strong> (<code>eu.xray.cloud.getxray.app</code>) —
+        opcjonalnie, gdy użytkownik włączy generowanie kroków AI. Client ID i Client
+        Secret służą wyłącznie do pobrania tokenu JWT i wykonania mutacji GraphQL
+        dodających kroki testowe.</li>
+      <li><strong>Google Gemini API</strong>
+        (<code>generativelanguage.googleapis.com</code>) — opcjonalnie, gdy użytkownik
+        włączy generowanie kroków AI. Przesyłany jest tytuł i opis zadania Jira
+        w celu wygenerowania kroków testowych. Obowiązuje
+        <a href="https://policies.google.com/privacy" target="_blank">Polityka prywatności Google</a>.</li>
+    </ul>
+    <p>Żadne dane <strong>nie są wysyłane</strong> na serwery dewelopera rozszerzenia
+    ani żadne inne serwery poza wymienionymi powyżej.</p>
+
+    <h2>5. Cel przetwarzania danych</h2>
+    <p>Dane są przetwarzane wyłącznie w celu realizacji funkcji rozszerzenia:
+    automatycznego tworzenia artefaktów testowych Xray (Test Cases, Test Plans,
+    Test Executions) w Jira Cloud na podstawie zapytania JQL podanego przez użytkownika.</p>
+
+    <h2>6. Bezpieczeństwo</h2>
+    <ul>
+      <li>Wszystkie połączenia z zewnętrznymi API odbywają się wyłącznie przez HTTPS.</li>
+      <li>Klucze API i dane uwierzytelniające są przechowywane lokalnie w przeglądarce
+        i nigdy nie opuszczają urządzenia użytkownika w żaden inny sposób niż
+        opisany w sekcji 4.</li>
+      <li>Rozszerzenie nie wykonuje żadnego zdalnego kodu — cały kod jest zawarty
+        w pliku rozszerzenia.</li>
+    </ul>
+
+    <h2>7. Prawa użytkownika</h2>
+    <p>Użytkownik ma pełną kontrolę nad swoimi danymi:</p>
+    <ul>
+      <li>Dane konfiguracyjne można usunąć w dowolnym momencie przez odinstalowanie
+        rozszerzenia lub wyczyszczenie danych rozszerzenia w ustawieniach Chrome
+        (<code>chrome://extensions/</code>).</li>
+      <li>Funkcje AI (Gemini, Xray Cloud) są całkowicie opcjonalne — klucze nie muszą
+        być podawane, jeśli użytkownik nie korzysta z tej funkcji.</li>
+    </ul>
+
+    <h2>8. Zmiany polityki prywatności</h2>
+    <p>Wszelkie zmiany tej polityki będą publikowane na tej stronie z aktualizowaną datą.
+    Dalsze korzystanie z rozszerzenia po wprowadzeniu zmian oznacza ich akceptację.</p>
+
+    <h2>9. Kontakt</h2>
+    <p>W razie pytań dotyczących prywatności skontaktuj się przez sekcję Issues
+    w repozytorium GitHub rozszerzenia.</p>
+  </div>
+
+  <!-- ENGLISH -->
+  <div id="en">
+    <h1>Privacy Policy</h1>
+    <p class="meta">Extension: <strong>Xray Test Generator</strong><br>
+    Last updated: March 13, 2026</p>
+
+    <h2>1. Data Controller</h2>
+    <p>This extension is a client-side developer tool. The extension developer does not
+    collect, process, or have access to any user data. All data remains on the user's
+    device or is transmitted directly to services configured by the user.</p>
+
+    <h2>2. Data Processed</h2>
+    <p>The extension processes the following data voluntarily provided by the user:</p>
+    <ul>
+      <li><strong>Jira instance URL</strong> (e.g. <code>https://company.atlassian.net</code>)</li>
+      <li><strong>Jira account email address</strong></li>
+      <li><strong>Jira API Key</strong> — authentication token for Jira Cloud</li>
+      <li><strong>Project key, component name, fix version</strong> — configuration parameters</li>
+      <li><strong>JQL query</strong> — issue selection filter</li>
+      <li><strong>Xray Client ID / Client Secret</strong> (optional) — credentials for Xray Cloud</li>
+      <li><strong>Google Gemini API Key</strong> (optional) — for AI step generation</li>
+    </ul>
+
+    <h2>3. Data Storage</h2>
+    <p>All of the above data is stored <strong>exclusively locally</strong> in the user's
+    browser using <code>chrome.storage.local</code>. The extension developer has no
+    access to this data.</p>
+
+    <h2>4. External Services</h2>
+    <p>Data is transmitted only to services designated by the user in the configuration:</p>
+    <ul>
+      <li><strong>Jira Cloud (Atlassian)</strong> — email and API key are used to
+        authorize REST API requests (creating issues, searching, linking). Data is
+        sent only to the Jira instance specified by the user.</li>
+      <li><strong>Xray Cloud</strong> (<code>eu.xray.cloud.getxray.app</code>) —
+        optionally, when the user enables AI step generation. Client ID and Client
+        Secret are used solely to obtain a JWT token and execute GraphQL mutations
+        to add test steps.</li>
+      <li><strong>Google Gemini API</strong>
+        (<code>generativelanguage.googleapis.com</code>) — optionally, when the user
+        enables AI step generation. The Jira issue title and description are sent to
+        generate test steps. Google's
+        <a href="https://policies.google.com/privacy" target="_blank">Privacy Policy</a>
+        applies.</li>
+    </ul>
+    <p>No data is sent to the extension developer's servers or any other servers
+    beyond those listed above.</p>
+
+    <h2>5. Purpose of Processing</h2>
+    <p>Data is processed solely to provide the extension's functionality: automated
+    creation of Xray test artifacts (Test Cases, Test Plans, Test Executions) in Jira
+    Cloud based on a JQL query provided by the user.</p>
+
+    <h2>6. Security</h2>
+    <ul>
+      <li>All connections to external APIs use HTTPS only.</li>
+      <li>API keys and credentials are stored locally in the browser and never leave
+        the user's device in any way other than described in section 4.</li>
+      <li>The extension does not execute any remote code — all code is bundled
+        within the extension package.</li>
+    </ul>
+
+    <h2>7. User Rights</h2>
+    <p>Users have full control over their data:</p>
+    <ul>
+      <li>Configuration data can be deleted at any time by uninstalling the extension
+        or clearing extension data in Chrome settings
+        (<code>chrome://extensions/</code>).</li>
+      <li>AI features (Gemini, Xray Cloud) are entirely optional — API keys do not
+        need to be provided if the user does not use these features.</li>
+    </ul>
+
+    <h2>8. Changes to This Policy</h2>
+    <p>Any changes to this policy will be published on this page with an updated date.
+    Continued use of the extension after changes constitutes acceptance.</p>
+
+    <h2>9. Contact</h2>
+    <p>For privacy-related questions, please contact via the Issues section of the
+    extension's GitHub repository.</p>
+  </div>
+
+</body>
+</html>
