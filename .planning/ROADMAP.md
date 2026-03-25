@@ -24,10 +24,10 @@ Plans:
 **Goal:** Test cases are properly registered in Xray test executions (visible as test runs), not just linked as Jira issues.
 
 **Covers:** XRAY-01, XRAY-02, XRAY-03, XRAY-04
-**Plans:** 1 plan
+**Plans:** 1/1 plans complete
 
 Plans:
-- [ ] 02-01-PLAN.md — Add addTestsToExecution REST method to xrayApiClient.js and wire call into sidepanel.js linkTestCasesToExecutions
+- [x] 02-01-PLAN.md — Add addTestsToExecution REST method to xrayApiClient.js and wire call into sidepanel.js linkTestCasesToExecutions
 
 **Verification:** After generation, open Xray test execution in Jira — tests should appear as actual test runs (green/red/pending status), not just Jira links.
 
@@ -36,4 +36,4 @@ Plans:
 ## Milestone Complete When
 
 - [ ] Phase 1 verified: AI steps generated without errors for attachment-heavy issues
-- [ ] Phase 2 verified: Tests appear as runs in Xray execution board, not just linked issues
+- [x] Phase 2 verified: Tests appear as runs in Xray execution board, not just linked issues (completed 2026-03-25)

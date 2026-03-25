@@ -13,10 +13,10 @@
 
 ### Xray Test Execution Linking
 
-- [ ] **XRAY-01**: After test executions are created, call Xray Cloud REST `POST /api/v2/testexec/{key}/test` with `{"add": [...testCaseKeys]}` to register tests in Xray (not just Jira issue links)
-- [ ] **XRAY-02**: `xrayApiClient.js` gets a new method `addTestsToExecution(testExecKey, testCaseKeys[])` using the Bearer JWT token already in use
-- [ ] **XRAY-03**: The call is batched — all test case keys sent in a single request per test execution (not one-by-one)
-- [ ] **XRAY-04**: Failure to add tests to Xray execution is logged as warning but does not abort the overall generation (consistent with current error handling style)
+- [x] **XRAY-01**: After test executions are created, call Xray Cloud REST `POST /api/v2/testexec/{key}/test` with `{"add": [...testCaseKeys]}` to register tests in Xray (not just Jira issue links)
+- [x] **XRAY-02**: `xrayApiClient.js` gets a new method `addTestsToExecution(testExecKey, testCaseKeys[])` using the Bearer JWT token already in use
+- [x] **XRAY-03**: The call is batched — all test case keys sent in a single request per test execution (not one-by-one)
+- [x] **XRAY-04**: Failure to add tests to Xray execution is logged as warning but does not abort the overall generation (consistent with current error handling style)
 
 ## Out of Scope
 
@@ -33,10 +33,10 @@
 | ADF-01 | Phase 1 | Complete (01-01) |
 | ADF-02 | Phase 1 | Complete (01-01) |
 | ADF-03 | Phase 1 | Complete (01-01) |
-| XRAY-01 | Phase 2 | Pending |
-| XRAY-02 | Phase 2 | Pending |
-| XRAY-03 | Phase 2 | Pending |
-| XRAY-04 | Phase 2 | Pending |
+| XRAY-01 | Phase 2 | Complete |
+| XRAY-02 | Phase 2 | Complete |
+| XRAY-03 | Phase 2 | Complete |
+| XRAY-04 | Phase 2 | Complete |
 
 **Coverage:**
 - v1 requirements: 7 total
