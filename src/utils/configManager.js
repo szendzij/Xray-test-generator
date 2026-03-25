@@ -17,7 +17,7 @@ class ConfigManager {
             const allKeys = [...CONSTANTS.STORAGE.KEYS, 'geminiApiKey', 'useAiSteps', 'xrayClientId', 'xrayClientSecret'];
             const config = await chrome.storage.local.get(allKeys);
             CONSTANTS.STORAGE.KEYS.forEach(key => {
-                if (config[key]) DOMHelper.setValue(key, config[key]);
+                if (key !== 'jqlMode' && config[key]) DOMHelper.setValue(key, config[key]);
             });
             if (config['geminiApiKey']) DOMHelper.setValue('geminiApiKey', config['geminiApiKey']);
             if (config['xrayClientId']) DOMHelper.setValue('xrayClientId', config['xrayClientId']);

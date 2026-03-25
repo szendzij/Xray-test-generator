@@ -94,7 +94,7 @@ class JiraApiClient {
         const data = await this.searchIssues({
             jql,
             maxResults,
-            fields: ['summary', 'issuetype', 'priority', 'description', 'assignee', 'reporter']
+            fields: ['summary', 'issuetype', 'priority', 'description', 'assignee', 'reporter', 'labels']
         });
         return data?.issues ?? [];
     }

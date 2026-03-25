@@ -121,7 +121,8 @@ class JiraService {
                 priority: { name: issue.fields.priority?.name || 'Medium' },
                 components: [{ name: config.componentName }],
                 fixVersions: config.fixVersion ? [{ name: config.fixVersion }] : [],
-                ...(reporterAccountId && { assignee: { accountId: reporterAccountId } })
+                ...(reporterAccountId && { assignee: { accountId: reporterAccountId } }),
+                ...(issue.fields.labels?.length && { labels: issue.fields.labels })
             }
         };
 
