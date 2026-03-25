@@ -103,13 +103,9 @@ class JiraService {
         if (existingTestCase) return null;
 
         const reporterAccountId = issue.fields.reporter?.accountId;
-        const sourceDescription = issue.fields.description;
-        const linkParagraph = {
-            type: 'paragraph',
-            content: [{ type: 'text', text: `Test case for issue ${config.jiraUrl}/browse/${issue.key}` }]
-        };
-        const description = (sourceDescription?.type === 'doc' && Array.isArray(sourceDescription.content))
-            ? { type: 'doc', version: 1, content: [linkParagraph, ...sourceDescription.content] }
+        const extractedText = this.extractAdfText(issue.fields.description);
+        const description = extractedText
+            ? this.buildAdfDoc(`Test case for issue ${config.jiraUrl}/browse/${issue.key}`, extractedText)
             : this.buildAdfDoc(`Test case for issue ${config.jiraUrl}/browse/${issue.key}`);
 
         const testCaseData = {
