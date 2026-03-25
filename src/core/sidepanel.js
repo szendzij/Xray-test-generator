@@ -187,9 +187,12 @@ class XrayTestGenerator {
             const errorHandler = new ErrorHandler();
             this.jiraService = new JiraService(config, errorHandler);
 
-            if (config.useAiSteps && config.xrayClientId && config.xrayClientSecret) {
-                const xrayClient = new XrayApiClient(config.xrayClientId, config.xrayClientSecret);
-                this.jiraService.apiClient.setXrayClient(xrayClient);
+            this.xrayApiClient = null;
+            if (config.xrayClientId && config.xrayClientSecret) {
+                this.xrayApiClient = new XrayApiClient(config.xrayClientId, config.xrayClientSecret);
+                if (config.useAiSteps) {
+                    this.jiraService.apiClient.setXrayClient(this.xrayApiClient);
+                }
             }
 
             this.uiManager.log(i18n.t('msg.starting'), 'info');
@@ -418,6 +421,17 @@ class XrayTestGenerator {
             this.uiManager.log(i18n.t('msg.linkingToExec', { key: execution.key }), 'info');
             const linkResult = await this.jiraService.linkTestCasesToIssue(testCases, execution.key);
             this.logLinkResult(linkResult, `Test Execution ${execution.key}`);
+
+            // Register tests in Xray execution (creates actual test runs on Xray board)
+            if (this.xrayApiClient) {
+                try {
+                    const keys = testCases.map(tc => tc.key);
+                    await this.xrayApiClient.addTestsToExecution(execution.key, keys);
+                    this.uiManager.log(`Registered ${keys.length} test(s) in Xray execution ${execution.key}`, 'success');
+                } catch (err) {
+                    logger.warn(`Xray execution registration failed for ${execution.key}: ${err.message}`);
+                }
+            }
         }
     }
 
