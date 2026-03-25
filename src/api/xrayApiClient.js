@@ -81,4 +81,23 @@ class XrayApiClient {
 
         return data.data?.addTestStep;
     }
+
+    async addTestsToExecution(testExecKey, testCaseKeys) {
+        const token = await this.getToken();
+
+        const response = await fetch(`${this.baseUrl}/api/v2/testexec/${testExecKey}/test`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({ add: testCaseKeys })
+        });
+
+        if (!response.ok) {
+            throw new Error(`Xray addTestsToExecution failed for ${testExecKey} (${response.status})`);
+        }
+
+        return response.json().catch(() => null);
+    }
 }
