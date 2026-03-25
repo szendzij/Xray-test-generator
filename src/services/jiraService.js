@@ -17,14 +17,27 @@ class JiraService {
     // --- Helpers ---
 
     extractAdfText(adf) {
-        if (!adf || typeof adf !== 'object') return '';
-        const extractNode = (node) => {
-            if (!node) return '';
-            if (node.type === 'text') return node.text || '';
-            if (Array.isArray(node.content)) return node.content.map(extractNode).join(' ');
-            return '';
-        };
-        return extractNode(adf).replace(/\s+/g, ' ').trim().substring(0, 2000);
+        try {
+            if (!adf || typeof adf !== 'object') return null;
+
+            const SKIP_NODES = new Set([
+                'media', 'mediaSingle', 'mediaGroup', 'mediaInline',
+                'hardBreak', 'emoji', 'mention'
+            ]);
+
+            const extractNode = (node) => {
+                if (!node) return '';
+                if (SKIP_NODES.has(node.type)) return '';
+                if (node.type === 'text') return node.text || '';
+                if (Array.isArray(node.content)) return node.content.map(extractNode).join(' ');
+                return '';
+            };
+
+            const result = extractNode(adf).replace(/\s+/g, ' ').trim().substring(0, 2000);
+            return result.length >= 20 ? result : null;
+        } catch (e) {
+            return null;
+        }
     }
 
     async addTestStepsToTestCase(testCase, steps) {
