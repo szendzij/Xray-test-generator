@@ -13,7 +13,7 @@
 **Plans:** 1 plan
 
 Plans:
-- [ ] 01-01-PLAN.md — Harden extractAdfText with node blacklist, short-text threshold, and verify downstream null propagation
+- [x] 01-01-PLAN.md — Harden extractAdfText with node blacklist, short-text threshold, and verify downstream null propagation (COMPLETE — e0df66a)
 
 **Verification:** Generate steps for an issue whose description is only an embedded image — should not throw error, should use fallback label.
 

@@ -7,9 +7,9 @@
 
 ### ADF Description Fix
 
-- [ ] **ADF-01**: `extractAdfText` must return non-empty, meaningful text even when the description contains embedded images/attachments (media nodes)
-- [ ] **ADF-02**: If extracted description text is empty or too short (< 20 chars), fall back to a meaningful placeholder instead of passing garbage to Gemini
-- [ ] **ADF-03**: ADF node types `media`, `mediaSingle`, `mediaGroup`, `mediaInline` must be explicitly skipped during text extraction (they have no `text` and traversing their `content` yields nothing useful)
+- [x] **ADF-01**: `extractAdfText` must return non-empty, meaningful text even when the description contains embedded images/attachments (media nodes)
+- [x] **ADF-02**: If extracted description text is empty or too short (< 20 chars), fall back to a meaningful placeholder instead of passing garbage to Gemini
+- [x] **ADF-03**: ADF node types `media`, `mediaSingle`, `mediaGroup`, `mediaInline` must be explicitly skipped during text extraction (they have no `text` and traversing their `content` yields nothing useful)
 
 ### Xray Test Execution Linking
 
@@ -30,9 +30,9 @@
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| ADF-01 | Phase 1 | Pending |
-| ADF-02 | Phase 1 | Pending |
-| ADF-03 | Phase 1 | Pending |
+| ADF-01 | Phase 1 | Complete (01-01) |
+| ADF-02 | Phase 1 | Complete (01-01) |
+| ADF-03 | Phase 1 | Complete (01-01) |
 | XRAY-01 | Phase 2 | Pending |
 | XRAY-02 | Phase 2 | Pending |
 | XRAY-03 | Phase 2 | Pending |
