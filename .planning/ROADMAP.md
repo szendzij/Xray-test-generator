@@ -10,17 +10,10 @@
 **Goal:** AI test step generation no longer fails when Jira issues contain embedded images or attachment-heavy descriptions.
 
 **Covers:** ADF-01, ADF-02, ADF-03
+**Plans:** 1 plan
 
-### Plans
-
-1. **Harden `extractAdfText` in `jiraService.js`**
-   - Explicitly skip node types: `media`, `mediaSingle`, `mediaGroup`, `mediaInline`, `hardBreak`, `emoji`, `mention`
-   - Return only meaningful text from `paragraph`, `heading`, `bulletList`, `orderedList`, `listItem`, `text` nodes
-   - After extraction: if result is empty or < 20 chars, return `null` instead of empty string
-
-2. **Handle null/empty description in `sidepanel.js` `generateAiTestSteps`**
-   - If `extractAdfText` returns `null`, pass `null` as description to `generateTestSteps`
-   - `llmApiClient.js` already handles `null` description with `noDescriptionLabel` fallback — verify it works correctly
+Plans:
+- [ ] 01-01-PLAN.md — Harden extractAdfText with node blacklist, short-text threshold, and verify downstream null propagation
 
 **Verification:** Generate steps for an issue whose description is only an embedded image — should not throw error, should use fallback label.
 
