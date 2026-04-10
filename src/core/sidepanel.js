@@ -443,6 +443,35 @@ class XrayTestGenerator {
             this.uiManager.log(i18n.t('msg.allExecsExisted', { count: testExecutions.length }), 'info');
         }
 
+        // Link new executions to test plan
+        const newExecs = testExecutions.filter(e => !e._wasExisting);
+        if (newExecs.length > 0) {
+            const newExecKeys = newExecs.map(e => e.key);
+            if (this.xrayApiClient) {
+                try {
+                    await this.xrayApiClient.addExecutionsToTestPlan(testPlan.key, newExecKeys);
+                    this.uiManager.log(`Linked ${newExecKeys.length} execution(s) to Test Plan ${testPlan.key} via Xray`, 'success');
+                } catch (err) {
+                    logger.warn(`Xray addExecutionsToTestPlan failed: ${err.message}`);
+                    for (const key of newExecKeys) {
+                        try {
+                            await this.jiraService.apiClient.linkIssues(key, testPlan.key);
+                        } catch (fallbackErr) {
+                            logger.warn(`Jira fallback linkIssues failed for ${key}: ${fallbackErr.message}`);
+                        }
+                    }
+                }
+            } else {
+                for (const key of newExecKeys) {
+                    try {
+                        await this.jiraService.apiClient.linkIssues(key, testPlan.key);
+                    } catch (fallbackErr) {
+                        logger.warn(`Jira fallback linkIssues failed for ${key}: ${fallbackErr.message}`);
+                    }
+                }
+            }
+        }
+
         return { testExecutions, createdExecutions };
     }
 
