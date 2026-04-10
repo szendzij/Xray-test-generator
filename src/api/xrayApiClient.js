@@ -100,4 +100,52 @@ class XrayApiClient {
 
         return response.json().catch(() => null);
     }
+
+    async addTestRequirement(testKey, requirementKey) {
+        const token = await this.getToken();
+        const response = await fetch(`${this.baseUrl}/api/v2/test/${testKey}/requirement`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({ add: [requirementKey] })
+        });
+        if (!response.ok) {
+            throw new Error(`Xray addTestRequirement failed for ${testKey} (${response.status})`);
+        }
+        return response.json().catch(() => null);
+    }
+
+    async addTestsToTestPlan(planKey, testKeys) {
+        const token = await this.getToken();
+        const response = await fetch(`${this.baseUrl}/api/v2/testplan/${planKey}/test`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({ add: testKeys })
+        });
+        if (!response.ok) {
+            throw new Error(`Xray addTestsToTestPlan failed for ${planKey} (${response.status})`);
+        }
+        return response.json().catch(() => null);
+    }
+
+    async addExecutionsToTestPlan(planKey, execKeys) {
+        const token = await this.getToken();
+        const response = await fetch(`${this.baseUrl}/api/v2/testplan/${planKey}/testexecution`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({ add: execKeys })
+        });
+        if (!response.ok) {
+            throw new Error(`Xray addExecutionsToTestPlan failed for ${planKey} (${response.status})`);
+        }
+        return response.json().catch(() => null);
+    }
 }
