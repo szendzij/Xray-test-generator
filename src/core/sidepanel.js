@@ -404,6 +404,20 @@ class XrayTestGenerator {
 
         this.setStage(i18n.t('msg.stage4', { count: testCases.length }));
         this.uiManager.log(i18n.t('msg.step4'), 'info');
+
+        if (this.xrayApiClient) {
+            try {
+                const keys = testCases.map(tc => tc.key);
+                await this.xrayApiClient.addTestsToTestPlan(testPlan.key, keys);
+                this.uiManager.log(`Linked ${keys.length} test(s) to Test Plan ${testPlan.key} via Xray`, 'success');
+                this.uiManager.showProgress(CONSTANTS.PROGRESS.LINK_TEST_CASES, i18n.t('msg.linkedCount', { count: keys.length }));
+                return;
+            } catch (err) {
+                logger.warn(`Xray addTestsToTestPlan failed: ${err.message}`);
+            }
+        }
+
+        // Jira fallback
         const linkResult = await this.jiraService.linkTestCasesToIssue(testCases, testPlan.key);
         this.logLinkResult(linkResult, `Test Plan ${testPlan.key}`);
         this.uiManager.showProgress(CONSTANTS.PROGRESS.LINK_TEST_CASES, i18n.t('msg.linkedCount', { count: linkResult.linked }));
