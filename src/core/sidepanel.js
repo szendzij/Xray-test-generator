@@ -297,10 +297,18 @@ class XrayTestGenerator {
                             this.uiManager.log(`Linked ${testCase.key} → ${issue.key} as Test Coverage (Xray)`, 'success');
                         } catch (err) {
                             logger.warn(`Xray addTestRequirement failed for ${testCase.key}: ${err.message}`);
-                            await this.jiraService.apiClient.linkIssues(testCase.key, issue.key, CONSTANTS.LINK_TYPES.TESTS);
+                            try {
+                                await this.jiraService.apiClient.linkIssues(testCase.key, issue.key, CONSTANTS.LINK_TYPES.TESTS);
+                            } catch (fallbackErr) {
+                                logger.warn(`Jira fallback linkIssues failed for ${testCase.key}: ${fallbackErr.message}`);
+                            }
                         }
                     } else {
-                        await this.jiraService.apiClient.linkIssues(testCase.key, issue.key, CONSTANTS.LINK_TYPES.TESTS);
+                        try {
+                            await this.jiraService.apiClient.linkIssues(testCase.key, issue.key, CONSTANTS.LINK_TYPES.TESTS);
+                        } catch (fallbackErr) {
+                            logger.warn(`Jira fallback linkIssues failed for ${testCase.key}: ${fallbackErr.message}`);
+                        }
                     }
                 } else {
                     skippedCount++;
