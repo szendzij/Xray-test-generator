@@ -80,6 +80,9 @@ const CONSTANTS = {
         TEST: 'Test',
         TEST_PLAN: 'Test Plan',
         TEST_EXECUTION: 'Test Execution'
+    },
+    LINK_TYPES: {
+        TESTS: 'Tests'   // Xray-specific link type; establishes Test Coverage on source issue
     }
 };
 
