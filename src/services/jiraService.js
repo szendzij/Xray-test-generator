@@ -123,7 +123,6 @@ class JiraService {
         };
 
         const response = await this.apiClient.createIssue(testCaseData);
-        await this.apiClient.linkIssues(response.key, issue.key);
         return response;
     }
 
@@ -195,9 +194,6 @@ class JiraService {
 
             executions.push(execution);
             createdCount += 1;
-
-            // Link execution to test plan via issue link for traceability
-            await this.apiClient.linkIssues(execution.key, testPlan.key);
         }
 
         return { executions, createdCount, skippedExecutions };
