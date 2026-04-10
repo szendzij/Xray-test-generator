@@ -289,6 +289,19 @@ class XrayTestGenerator {
                     issueMap.set(testCase.key, issue);
                     createdCount++;
                     this.uiManager.log(i18n.t('msg.testCaseCreated', { key: testCase.key, issueKey: issue.key }), 'success');
+
+                    // Link test to original issue as Test Coverage
+                    if (this.xrayApiClient) {
+                        try {
+                            await this.xrayApiClient.addTestRequirement(testCase.key, issue.key);
+                            this.uiManager.log(`Linked ${testCase.key} → ${issue.key} as Test Coverage (Xray)`, 'success');
+                        } catch (err) {
+                            logger.warn(`Xray addTestRequirement failed for ${testCase.key}: ${err.message}`);
+                            await this.jiraService.apiClient.linkIssues(testCase.key, issue.key, CONSTANTS.LINK_TYPES.TESTS);
+                        }
+                    } else {
+                        await this.jiraService.apiClient.linkIssues(testCase.key, issue.key, CONSTANTS.LINK_TYPES.TESTS);
+                    }
                 } else {
                     skippedCount++;
                     this.uiManager.log(i18n.t('msg.testCaseSkipped', { issueKey: issue.key }), 'warning');
